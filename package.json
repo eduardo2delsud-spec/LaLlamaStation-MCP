@@ -19,8 +19,8 @@
 		"url": "git+https://github.com/EduMMorenolp/MPC-Ollama-Local.git"
 	},
 	"keywords": [],
-	"author": "",
-	"license": "ISC",
+	"author": "Eduardo Moreno",
+	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/EduMMorenolp/MPC-Ollama-Local/issues"
 	},

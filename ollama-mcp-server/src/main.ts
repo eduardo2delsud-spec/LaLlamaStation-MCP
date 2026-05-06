@@ -709,8 +709,14 @@ app.post("/api/ollama/restart", authMiddleware, async (_req, res) => {
 // --- Scraper de Ollama Library ---
 app.get("/api/search-models", authMiddleware, async (req, res) => {
 	const q = (req.query.q as string) || "";
+	const sort = (req.query.sort as string) || "";
 	try {
-		const url = `https://ollama.com/library${q ? `?q=${encodeURIComponent(q)}` : ""}`;
+		let url = "https://ollama.com/library";
+		const params = new URLSearchParams();
+		if (q) params.append("q", q);
+		if (sort) params.append("sort", sort);
+		const qs = params.toString();
+		if (qs) url += `?${qs}`;
 		const response = await axios.get(url, {
 			timeout: 8000,
 			headers: { "User-Agent": "Mozilla/5.0 (compatible; LaLlamaStation-MCP/1.0)" },
