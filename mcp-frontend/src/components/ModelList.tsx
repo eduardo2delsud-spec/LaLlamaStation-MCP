@@ -71,6 +71,7 @@ const FALLBACK_MODELS = [
 
 export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPull, onDelete }) => {
 	const [searchTerm, setSearchTerm] = useState("");
+	const [directPullTerm, setDirectPullTerm] = useState("");
 	const [searchResults, setSearchResults] = useState<any[]>([]);
 	const [isSearching, setIsSearching] = useState(false);
 	const [searchError, setSearchError] = useState("");
@@ -104,15 +105,17 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 
 	const handleManualPull = () => {
 		if (searchTerm.trim()) {
-			if (!searchTerm.includes(" ") && (searchTerm.includes(":") || searchTerm.includes("/"))) {
-				setVerificationModel({
-					name: searchTerm.trim(),
-					title: searchTerm.trim(),
-					desc: "Modelo ingresado manualmente. Verifica el nombre antes de continuar.",
-				});
-			} else {
-				handleSearch(searchTerm);
-			}
+			handleSearch(searchTerm);
+		}
+	};
+
+	const handleDirectPull = () => {
+		if (directPullTerm.trim()) {
+			setVerificationModel({
+				name: directPullTerm.trim(),
+				title: directPullTerm.trim(),
+				desc: "Modelo ingresado manualmente. Verifica el nombre antes de continuar.",
+			});
 		}
 	};
 
@@ -121,6 +124,7 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 			onPull(verificationModel.name);
 			setVerificationModel(null);
 			setSearchTerm("");
+			setDirectPullTerm("");
 		}
 	};
 
@@ -363,11 +367,11 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 							NOMBRE DIRECTO
 						</p>
 						<p style={{ fontSize: "11px", color: "var(--text-dim)", lineHeight: "1.5" }}>
-							Escribe{" "}
+							Usa el campo de <strong>Descarga Directa</strong> abajo para modelos con tags específicos (ej:{" "}
 							<code style={{ fontFamily: "var(--font-mono)", color: "var(--text-main)" }}>
 								llama3.2:3b
-							</code>{" "}
-							en el buscador y presiona el <strong>Buscador</strong>.
+							</code>
+							).
 						</p>
 					</div>
 				</div>
@@ -398,6 +402,47 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 					</h2>
 				</div>
 
+				{/* DESCARGA DIRECTA */}
+				<div className="model-search-bar" style={{ marginBottom: "16px", background: "rgba(255,255,255,0.02)" }}>
+					<div style={{ position: "relative", flex: 1 }}>
+						<Download
+							size={18}
+							style={{
+								position: "absolute",
+								left: "16px",
+								top: "50%",
+								transform: "translateY(-50%)",
+								opacity: 0.3,
+								color: "var(--accent)"
+							}}
+						/>
+						<input
+							type="text"
+							placeholder="Descarga directa: pegar nombre exacto con tag (ej: deepseek-r1:7b)..."
+							className="pin-input"
+							style={{
+								padding: "14px 14px 14px 48px",
+								textAlign: "left",
+								fontSize: "13px",
+								letterSpacing: "0",
+							}}
+							value={directPullTerm}
+							onChange={(e) => setDirectPullTerm(e.target.value)}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") handleDirectPull();
+							}}
+						/>
+					</div>
+					<button
+						className="auth-btn"
+						style={{ width: "auto", padding: "0 24px", display: "flex", alignItems: "center", gap: "8px" }}
+						onClick={handleDirectPull}
+					>
+						<Download size={16} /> Descargar
+					</button>
+				</div>
+
+				{/* BUSCADOR */}
 				<div className="model-search-bar">
 					<div style={{ position: "relative", flex: 1 }}>
 						<Search
@@ -412,7 +457,7 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 						/>
 						<input
 							type="text"
-							placeholder="Buscar en librería (Enter) o pegar nombre exacto con tag para descargar (ej: llama3.2:3b)..."
+							placeholder="Buscar en la librería de Ollama (ej: mistral)..."
 							className="pin-input"
 							style={{
 								padding: "14px 14px 14px 48px",
@@ -429,7 +474,7 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 					</div>
 					<button
 						className="auth-btn"
-						style={{ width: "auto", padding: "0 24px", display: "flex", alignItems: "center", gap: "8px" }}
+						style={{ width: "auto", padding: "0 24px", display: "flex", alignItems: "center", gap: "8px", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-light)", color: "var(--text-main)" }}
 						onClick={handleManualPull}
 						disabled={isSearching}
 					>
