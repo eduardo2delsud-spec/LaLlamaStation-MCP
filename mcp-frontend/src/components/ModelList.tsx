@@ -5,8 +5,8 @@ import {
 	Info,
 	Layers,
 	Loader,
-	PlusCircle,
 	RefreshCw,
+	ScanSearch,
 	Search,
 	Sparkles,
 	Trash2,
@@ -79,8 +79,8 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 
 	const installedNames = models?.filter((m) => !!m?.name).map((m) => m.name as string) || [];
 
-	const handleSearch = useCallback(async (term: string) => {
-		if (!term.trim()) {
+	const handleSearch = useCallback(async (term: string, sort?: string) => {
+		if (!term.trim() && !sort) {
 			setSearchResults([]);
 			setHasSearched(false);
 			return;
@@ -89,7 +89,10 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 		setSearchError("");
 		setHasSearched(true);
 		try {
-			const res = await api.get(`/api/search-models?q=${encodeURIComponent(term)}`);
+			const params = new URLSearchParams();
+			if (term.trim()) params.append("q", term);
+			if (sort) params.append("sort", sort);
+			const res = await api.get(`/api/search-models?${params.toString()}`);
 			setSearchResults(res.data.models || []);
 		} catch {
 			setSearchError("No se pudo conectar con ollama.com. Usa los modelos sugeridos abajo.");
@@ -101,8 +104,7 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 
 	const handleManualPull = () => {
 		if (searchTerm.trim()) {
-			// Si el término parece un nombre de modelo directo, mostrar modal de verificación
-			if (!searchTerm.includes(" ") && (searchTerm.includes(":") || searchTerm.includes("/") || !hasSearched)) {
+			if (!searchTerm.includes(" ") && (searchTerm.includes(":") || searchTerm.includes("/"))) {
 				setVerificationModel({
 					name: searchTerm.trim(),
 					title: searchTerm.trim(),
@@ -465,12 +467,48 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 					</div>
 					<button
 						className="auth-btn"
-						style={{ width: "auto", padding: "0 28px", display: "flex", alignItems: "center", gap: "8px" }}
+						style={{ width: "auto", padding: "0 24px", display: "flex", alignItems: "center", gap: "8px" }}
 						onClick={handleManualPull}
 						disabled={isSearching}
 					>
-						{isSearching ? <Loader size={18} className="animate-spin" /> : <PlusCircle size={18} />}
+						{isSearching ? <Loader size={18} className="animate-spin" /> : <ScanSearch size={18} />}
 					</button>
+
+					{/* Filtros Rápidos */}
+					<button
+						className="btn-icon"
+						style={{ background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-light)", padding: "0 16px", borderRadius: "8px", fontSize: "12px", fontWeight: 600, color: "var(--text-main)", whiteSpace: "nowrap" }}
+						onClick={() => handleSearch(searchTerm, "popular")}
+						disabled={isSearching}
+						title="Ver los más descargados"
+					>
+						Populares
+					</button>
+					<button
+						className="btn-icon"
+						style={{ background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-light)", padding: "0 16px", borderRadius: "8px", fontSize: "12px", fontWeight: 600, color: "var(--text-main)", whiteSpace: "nowrap" }}
+						onClick={() => handleSearch(searchTerm, "newest")}
+						disabled={isSearching}
+						title="Ver los más recientes"
+					>
+						Nuevos
+					</button>
+
+					{/* Botón de Limpiar */}
+					{(hasSearched || searchTerm) && (
+						<button
+							className="btn-icon"
+							style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)", padding: "0 12px", borderRadius: "8px", color: "var(--warning)" }}
+							onClick={() => {
+								setSearchTerm("");
+								setSearchResults([]);
+								setHasSearched(false);
+							}}
+							title="Limpiar y volver a Sugeridos"
+						>
+							<Trash2 size={16} />
+						</button>
+					)}
 				</div>
 
 				{searchError && (
