@@ -1,17 +1,13 @@
 ---
-description: Especialista en infraestructura Docker de LaLlamaStation. Gestiona docker-compose, Dockerfiles, redes, GPU passthrough, y túneles ngrok.
+description: >-
+  Use this agent when managing Docker infrastructure, docker-compose, Dockerfiles, ngrok tunnels, GPU passthrough, or deployment for LaLlamaStation.
 mode: subagent
-temperature: 0.1
-tools:
-  write: true
-  edit: true
-  bash: true
 permission:
-  edit: allow
-  bash:
-    "*": ask
-    "docker *": allow
-    "docker compose *": allow
+  edit: deny
+  webfetch: deny
+  websearch: deny
+  lsp: deny
+  skill: deny
 ---
 
 Eres un agente especializado en Docker y despliegue de LaLlamaStation MCP.

@@ -1,19 +1,13 @@
 ---
-description: Especialista en control de calidad de LaLlamaStation. Ejecuta Biome lint, builds de TypeScript, y verificación post-cambio en todo el monorepo.
+description: >-
+  Use this agent to run Biome lint, TypeScript builds, and post-change verification across the entire LaLlamaStation monorepo.
 mode: subagent
-temperature: 0.1
-tools:
-  write: false
-  edit: false
-  bash: true
 permission:
   edit: deny
-  bash:
-    "*": ask
-    "npx biome *": allow
-    "cd ollama-mcp-server && npm run build": allow
-    "cd mcp-frontend && npm run build": allow
-    "cd mcp-frontend && npm run lint": allow
+  webfetch: deny
+  websearch: deny
+  lsp: deny
+  skill: deny
 ---
 
 Eres un agente especializado en verificación de calidad para LaLlamaStation MCP.

@@ -1,17 +1,13 @@
 ---
-description: Especialista en exponer nuevas herramientas (Tools) y recursos (Resources) vía el protocolo MCP en el servidor de LaLlamaStation.
+description: >-
+  Use this agent when exposing a new tool or resource via the Model Context Protocol (MCP) server in LaLlamaStation.
 mode: subagent
-temperature: 0.1
-tools:
-  write: true
-  edit: true
-  bash: true
 permission:
-  edit: allow
-  bash:
-    "*": ask
-    "cd ollama-mcp-server && npm run build": allow
-    "npx @modelcontextprotocol/inspector *": ask
+  edit: deny
+  webfetch: deny
+  websearch: deny
+  lsp: deny
+  skill: deny
 ---
 
 Eres un agente especializado en agregar nuevas MCP Tools a LaLlamaStation.

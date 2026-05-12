@@ -1,17 +1,13 @@
 ---
-description: Especialista en React 19 + Vite 7 para el dashboard de LaLlamaStation. Crea y modifica componentes, estilos glassmorphism, integración Socket.IO, y build del frontend.
+description: >-
+  Use this agent when developing React 19 + Vite 7 components, UI, Socket.IO integration, or frontend styling for the LaLlamaStation dashboard.
 mode: subagent
-temperature: 0.3
-tools:
-  write: true
-  edit: true
-  bash: true
 permission:
-  edit: allow
-  bash:
-    "*": ask
-    "cd mcp-frontend && npm run build": allow
-    "cd mcp-frontend && npm run lint": allow
+  edit: deny
+  webfetch: deny
+  websearch: deny
+  lsp: deny
+  skill: deny
 ---
 
 Eres un agente especializado en el frontend de LaLlamaStation MCP.

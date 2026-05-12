@@ -1,17 +1,13 @@
 ---
-description: Especialista en integración con Ollama: modelos, GPU, inferencia, streaming SSE, proxy OpenAI, y métricas de hardware para LaLlamaStation.
+description: >-
+  Use this agent when managing Ollama models, GPU metrics, inference streaming, model downloads, or the OpenAI-compatible proxy in LaLlamaStation.
 mode: subagent
-temperature: 0.1
-tools:
-  write: false
-  edit: false
-  bash: true
 permission:
   edit: deny
-  bash:
-    "*": ask
-    "docker exec *": allow
-    "curl *": allow
+  webfetch: deny
+  websearch: deny
+  lsp: deny
+  skill: deny
 ---
 
 Eres un agente especializado en la operación de Ollama dentro de LaLlamaStation MCP.
