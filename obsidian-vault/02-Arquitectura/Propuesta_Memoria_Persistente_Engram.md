@@ -77,10 +77,6 @@ Para igualar al 100% las capacidades de otros MCPs o superarlas, podemos agregar
 | ⭐ `mem_judge` (Beta) | Usa un LLM para evaluar conflictos entre recuerdos similares. | **Agregar (¡Mejorada!)**. Al tener a Ollama localmente, podemos hacer que LaLlamaStation evalúe los conflictos usando un modelo local asíncronamente, sin consumir tokens de la API del agente. |
 | `mem_session_summary` | Obtiene el resumen de la sesión actual o pasada. | *Opcional*. Útil si el agente quiere recordar en qué quedó ayer. |
 | `mem_compare` | Compara dos proyectos o recuerdos distintos. | *Opcional*. Se puede implementar fácilmente. |
-| `mem_doctor` | Diagnóstico de salud de la base de datos de memoria. | *No necesaria*. Tendremos el Dashboard de React ("Cerebro") para hacer diagnósticos visuales. |
-| `mem_merge_projects` | Fusiona recuerdos de dos proyectos distintos. | *Opcional*. Se puede hacer mejor desde la interfaz visual de React. |
-| `mem_save_prompt` | Devuelve instrucciones sobre cómo estructurar un buen recuerdo. | *No necesaria*. Se puede inyectar en las descripciones de los esquemas de las herramientas. |
-| `mem_capture_passive` | Captura pasiva de datos en segundo plano. | *No aplicable*. Para servidores MCP orientados a chat interactivo, la captura activa es suficiente. |
 
 ---
 
@@ -90,9 +86,3 @@ Se propone agregar una pestaña **"Cerebro" (o "Memoria")** en el Dashboard actu
 * **Timeline y Dashboard**: Estadísticas y línea de tiempo de lo que el agente ha estado recordando en la carpeta `./brain`.
 * **Buscador Híbrido**: Toggle entre Búsqueda Léxica (FTS5) y Semántica (Vectores).
 * **Editor Visual**: El usuario podrá borrar recuerdos basura o editar el conocimiento del agente manualmente.
-
----
-
-> [!IMPORTANT]
-> **Estado Actual**: Seguimos en fase de diseño y planificación. No se ha escrito código.
-> **Decisión Pendiente**: De las 9 herramientas analizadas en la sección 3, ¿deseas incluir `mem_get_observation`, `mem_current_project` y `mem_judge`, o prefieres agregar alguna otra?
