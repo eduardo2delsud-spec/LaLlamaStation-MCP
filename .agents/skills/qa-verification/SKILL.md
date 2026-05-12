@@ -1,3 +1,17 @@
+---
+name: qa-verification
+description: Use this skill to run Biome lint, TypeScript builds, and post-change verification across the entire LaLlamaStation monorepo.
+triggers:
+  keywords:
+    - biome
+    - lint
+    - build
+    - verificar
+    - test
+    - typecheck
+    - qa
+---
+
 # Agente: QA & Verification
 
 ## Identidad

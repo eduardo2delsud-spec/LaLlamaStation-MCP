@@ -10,14 +10,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.0/).
 ### 🤖 Agentes especializados por dominio (AÑADIDO - 2026-05-12)
 
 #### Añadido
-- **Sistema de 6 agentes especializados** en `.agents/agents/`:
+- **Sistema de 6 agentes especializados** como subagentes de opencode en `.opencode/agents/`:
   - `frontend-dev`: React 19 + Vite 7, componentes glassmorphism, Socket.IO
   - `backend-dev`: Express + TypeScript, dockerode, MCP SDK, auth, rate limiting
   - `ollama-ops`: Gestión de modelos Ollama, GPU, streaming SSE, métricas
   - `documentation`: CHANGELOG, README, Obsidian vault, diseño técnico
   - `docker-ops`: Docker compose, Dockerfiles, ngrok, redes, GPU passthrough
   - `qa-verification`: Biome lint, TypeScript builds, verificación post-cambio
-- **`INDEX.md`** como catálogo central con triggers de activación automática (por patrón de archivo) y manual (por palabra clave)
+- También como skills de contexto detallado en `.agents/skills/` con frontmatter YAML y triggers por patrón de archivo
 
 ### ✨ Playground: Adjuntar archivos en chat (AGREGADO - 2026-04-19)
 

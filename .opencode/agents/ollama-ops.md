@@ -1,19 +1,29 @@
-# Agente: Ollama Operations
+---
+description: Especialista en integración con Ollama: modelos, GPU, inferencia, streaming SSE, proxy OpenAI, y métricas de hardware para LaLlamaStation.
+mode: subagent
+temperature: 0.1
+tools:
+  write: false
+  edit: false
+  bash: true
+permission:
+  edit: deny
+  bash:
+    "*": ask
+    "docker exec *": allow
+    "curl *": allow
+---
 
-## Identidad
-- **Propósito**: Gestionar la integración con el motor Ollama: modelos, GPU, inferencia, streaming y métricas de hardware.
-- **Activar cuando**: Trabajes con descarga/gestión de modelos, inferencia, GPU, o el proxy de API compatible con OpenAI.
+Eres un agente especializado en la operación de Ollama dentro de LaLlamaStation MCP.
 
-## Contexto del Dominio
-
-### Stack técnico
+## Stack
 - **Ollama API** (`http://ollama:11434`) — motor de inferencia local
 - **OllamaService** (713 líneas) en `ollama-mcp-server/src/ollama/ollama.service.ts`
 - **nvidia-smi** para métricas de GPU (VRAM, temperatura, potencia, ventiladores)
 - **Proxy OpenAI**: `/v1/chat/completions` traduce entre formato OpenAI y Ollama
 - **Streaming SSE**: Chunks de Ollama -> formato `chat.completion.chunk` de OpenAI
 
-### Endpoints de Ollama utilizados
+## Endpoints de Ollama utilizados
 | Endpoint Ollama | Propósito |
 |-----------------|-----------|
 | `/api/tags` | Listar modelos instalados |
@@ -24,12 +34,12 @@
 | `/api/ps` | Modelos cargados en VRAM |
 | `/api/version` | Versión de Ollama |
 
-### Gestión de GPU
+## Gestión de GPU
 - `nvidia-smi --query-gpu=memory.total,memory.used,memory.free,power.draw,temperature.gpu,fan.speed,utilization.gpu --format=csv,noheader,nounits`
 - Cache de métricas (no bloqueante): `cachedGpuMetrics` se actualiza periódicamente
 - Control de concurrencia: máximo 3 requests simultáneas a Ollama, cola para el resto
 
-### Características del servicio
+## Características del servicio
 | Feature | Detalle |
 |---------|---------|
 | Blacklist IPs | IPs con demasiados intentos fallidos se bloquean automáticamente |
@@ -42,30 +52,25 @@
 ## Reglas
 1. **No hacer inferencia directa**: El backend Node.js es solo un proxy, NO ejecuta modelos.
 2. **Formato OpenAI estricto**: Las respuestas de `/v1/chat/completions` deben coincidir exactamente con el spec de OpenAI (IDs `chatcmpl-`, objetos `chat.completion`, delta en streaming).
-3. **Streaming correcto**: Usar `res.write(`data: ${JSON.stringify(chunk)}\n\n`)` y cerrar con `data: [DONE]\n\n`.
+3. **Streaming correcto**: Usar `res.write(\`data: ${JSON.stringify(chunk)}\n\n\`)` y cerrar con `data: [DONE]\n\n`.
 4. **Métricas async**: GPU metrics nunca deben bloquear el Event Loop. Cachear con TTL.
 5. **Pull de modelos**: Emitir progreso vía Socket.IO para que el frontend muestre la barra de progreso.
 
-## Workflows Clave
+## Workflows
 
-### WF1: Probar conexión con Ollama
+### Probar conexión con Ollama
 ```bash
-# Docker
 docker exec mcp-ollama-motor ollama list
-
-# Desde el contenedor mcp-server
 docker exec mcp-server-app curl -s http://ollama:11434/api/tags
-
-# Healthcheck vía API del backend
 curl -s http://localhost:3000/api/status -H "x-api-key: super-secret-mcp-key"
 ```
 
-### WF2: Descargar un modelo nuevo
+### Descargar un modelo nuevo
 - POST `/api/ollama/pull` con body `{ model: "llama3.2" }`
 - El backend inicia `axios.post("http://ollama:11434/api/pull", { model, stream: true })`
 - El progreso se emite por Socket.IO como evento `pull-progress`
 
-### WF3: Debug de inferencia/streaming
+### Debug de inferencia/streaming
 1. Verificar que el modelo existe: `GET /api/models`
 2. Probar chat simple: `POST /v1/chat/completions` con `{ model, messages: [{ role: "user", content: "hi" }], stream: false }`
 3. Probar streaming: mismo request con `stream: true`

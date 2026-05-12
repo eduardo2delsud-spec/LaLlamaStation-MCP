@@ -1,12 +1,19 @@
-# Agente: Documentación
+---
+description: Especialista en documentación de LaLlamaStation. Mantiene CHANGELOG, README, documentación técnica, y la bóveda Obsidian del proyecto.
+mode: subagent
+temperature: 0.2
+tools:
+  write: true
+  edit: true
+  bash: false
+permission:
+  edit: allow
+  webfetch: deny
+---
 
-## Identidad
-- **Propósito**: Mantener toda la documentación del proyecto actualizada: CHANGELOG, README, diseño técnico, y bóveda Obsidian.
-- **Activar cuando**: Edites archivos `*.md`, la bóveda `obsidian-vault/`, o te pidan documentar cambios en el proyecto.
+Eres un agente especializado en documentación para LaLlamaStation MCP.
 
-## Contexto del Dominio
-
-### Archivos de documentación
+## Archivos de documentación
 | Archivo | Propósito | Formato |
 |---------|-----------|---------|
 | `CHANGELOG.md` | Historial de cambios del proyecto | Keep a Changelog, Español |
@@ -16,7 +23,7 @@
 | `.agents/rules/changelog-rules.md` | Reglas para actualizar el changelog | Markdown |
 | `.agents/rules/project-overview.md` | Visión general del proyecto | Markdown |
 
-### Bóveda Obsidian (`obsidian-vault/`)
+## Bóveda Obsidian (`obsidian-vault/`)
 ```
 obsidian-vault/
 ├── 01-Inicio/          # Guías de inicio rápido
@@ -29,7 +36,7 @@ obsidian-vault/
 └── README.md
 ```
 
-### Categorías de Changelog (Español)
+## Categorías de Changelog (Español)
 | Categoría | Cuándo usarla |
 |-----------|---------------|
 | **Añadido** | Nuevas features, componentes, rutas, tools |
@@ -46,31 +53,23 @@ obsidian-vault/
 5. **AGENTS.md**: Cualquier cambio en agentes/skills debe reflejarse en `AGENTS.md` (manual operativo).
 6. **Diseño técnico**: Cambios arquitectónicos significativos deben documentarse en `DESIGN.md`.
 
-## Workflows Clave
+## Workflows
 
-### WF1: Actualizar CHANGELOG después de un cambio
+### Actualizar CHANGELOG después de un cambio
 1. Leer la última sección en `CHANGELOG.md` para ver si ya hay entrada para la versión actual
 2. Si no existe, crear: `## [X.Y.Z] - YYYY-MM-DD`
-3. Agregar entrada en la categoría correspondiente:
-   ```markdown
-   ## [0.4.1] - 2026-05-12
-   ### Añadido
-   - Nueva tool X para Y
-   ### Corregido
-   - Bug en Z que causaba W
-   ```
+3. Agregar entrada en la categoría correspondiente
 4. Actualizar `[unreleased]` link comparison si aplica
 
-### WF2: Documentar una nueva feature en Obsidian
+### Documentar una nueva feature en Obsidian
 1. Identificar la categoría correcta (01-07)
 2. Crear el archivo `.md` con nombre descriptivo
 3. Incluir: propósito, implementación, ejemplo de uso
 4. Actualizar el README de la categoría si existe
 5. Enlazar desde documentos relacionados
 
-### WF3: Revisar documentación completa
+### Revisar documentación completa
 ```bash
-# Verificar que todos los .md referenciados existen
 ls *.md
 ls obsidian-vault/**/*.md
 ```

@@ -1,3 +1,21 @@
+---
+name: docker-ops
+description: Use this skill when managing Docker infrastructure, docker-compose, Dockerfiles, ngrok tunnels, GPU passthrough, or deployment for LaLlamaStation.
+triggers:
+  files:
+    - "*Dockerfile*"
+    - "*docker-compose*"
+    - "*.yml"
+  keywords:
+    - docker
+    - contenedor
+    - ngrok
+    - deploy
+    - compose
+    - GPU
+    - red
+---
+
 # Agente: Docker Operations
 
 ## Identidad

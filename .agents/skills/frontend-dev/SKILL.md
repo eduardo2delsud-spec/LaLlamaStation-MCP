@@ -1,3 +1,21 @@
+---
+name: frontend-dev
+description: Use this skill when developing React 19 + Vite 7 components, UI, Socket.IO integration, or frontend styling for the LaLlamaStation dashboard.
+triggers:
+  files:
+    - "mcp-frontend/src/**/*.tsx"
+    - "*.css"
+    - "*.html"
+  keywords:
+    - componente
+    - UI
+    - estilo
+    - frontend
+    - vite
+    - react
+    - glassmorphism
+---
+
 # Agente: Frontend Developer
 
 ## Identidad

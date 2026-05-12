@@ -1,3 +1,20 @@
+---
+name: backend-dev
+description: Use this skill when developing Express + TypeScript backend routes, auth middleware, MCP tools, Dockerode, or telemetry services for LaLlamaStation.
+triggers:
+  files:
+    - "ollama-mcp-server/src/**/*.ts"
+  keywords:
+    - ruta
+    - API
+    - auth
+    - middleware
+    - endpoint
+    - servicio
+    - dockerode
+    - mcp
+---
+
 # Agente: Backend Developer
 
 ## Identidad
@@ -81,7 +98,7 @@
 4. Build: `cd ollama-mcp-server && npm run build`
 
 ### WF2: Agregar una nueva MCP Tool
-1. Seguir el skill [add-mcp-tool](../../skills/add-mcp-tool/SKILL.md)
+1. Seguir el skill [add-mcp-tool](../add-mcp-tool/SKILL.md)
 2. Definir en `ollama.tools.ts`:
    - Añadir al `MCP_TOOL_CATALOG`
    - Implementar schema en `ListToolsRequestSchema`
