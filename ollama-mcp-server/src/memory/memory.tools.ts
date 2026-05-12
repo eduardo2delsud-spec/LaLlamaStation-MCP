@@ -12,6 +12,8 @@ export const MEMORY_TOOL_CATALOG = [
 	{ name: "mem_timeline", description: "Get chronological timeline of memories" },
 	{ name: "mem_session_start", description: "Start a new logical work session" },
 	{ name: "mem_session_end", description: "End the work session and save summary" },
+	{ name: "mem_session_summary", description: "Get the summary of a specific session" },
+	{ name: "mem_compare", description: "Compare two memories using local LLM" },
 	{ name: "mem_stats", description: "Get statistics about the brain" },
 	{ name: "mem_suggest_tags", description: "Get tag suggestions for a text" },
 	{ name: "mem_get_observation", description: "Retrieve a specific memory by ID" },
@@ -201,6 +203,32 @@ export class MemoryTools {
 					},
 				},
 				{
+					name: "mem_session_summary",
+					description: "Get the summary of a specific session",
+					inputSchema: {
+						type: "object",
+						properties: {
+							sessionId: { type: "string" },
+							...authProps,
+						},
+						required: requireApiKey ? ["sessionId", "apiKey"] : ["sessionId"],
+					},
+				},
+				{
+					name: "mem_compare",
+					description: "Compare two memories using local LLM",
+					inputSchema: {
+						type: "object",
+						properties: {
+							memoryId1: { type: "string" },
+							memoryId2: { type: "string" },
+							model: { type: "string", description: "Local model to use (e.g. llama3)" },
+							...authProps,
+						},
+						required: requireApiKey ? ["memoryId1", "memoryId2", "model", "apiKey"] : ["memoryId1", "memoryId2", "model"],
+					},
+				},
+				{
 					name: "mem_stats",
 					description: "Get statistics about the brain",
 					inputSchema: {
@@ -293,6 +321,10 @@ export class MemoryTools {
 						const success = await this.memoryService.endSession(args?.sessionId as string, args?.summary as string);
 						return { content: [{ type: "text", text: success ? "Session ended and summarized." : "Session not found." }] };
 					}
+					case "mem_session_summary": {
+						const summary = await this.memoryService.getSessionSummary(args?.sessionId as string);
+						return { content: [{ type: "text", text: JSON.stringify(summary, null, 2) }] };
+					}
 					case "mem_timeline": {
 						const timeline = await this.memoryService.getTimeline(args?.project as string, (args?.limit as number) || 20);
 						return { content: [{ type: "text", text: JSON.stringify(timeline, null, 2) }] };
@@ -304,6 +336,10 @@ export class MemoryTools {
 					case "mem_judge": {
 						const verdict = await this.memoryService.judgeConflicts(args?.model as string, args?.project as string, args?.memoryId as string);
 						return { content: [{ type: "text", text: JSON.stringify(verdict, null, 2) }] };
+					}
+					case "mem_compare": {
+						const comparison = await this.memoryService.compareMemories(args?.model as string, args?.memoryId1 as string, args?.memoryId2 as string);
+						return { content: [{ type: "text", text: JSON.stringify(comparison, null, 2) }] };
 					}
 					case "mem_stats": {
 						const stats = await this.memoryService.getStats(args?.project as string);

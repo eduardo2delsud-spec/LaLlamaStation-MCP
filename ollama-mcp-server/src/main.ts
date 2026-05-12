@@ -751,6 +751,42 @@ app.get("/api/search-models", authMiddleware, async (req, res) => {
 	}
 });
 
+// --- Cerebro (Memoria) REST API para el Dashboard ---
+
+app.get("/api/memory/stats", authMiddleware, async (req, res) => {
+	const project = (req.query.project as string) || "lallamastation";
+	try {
+		const stats = await appModule.memoryService.getStats(project);
+		res.json(stats);
+	} catch (e: any) {
+		res.status(500).json({ error: e.message });
+	}
+});
+
+app.get("/api/memory/search", authMiddleware, async (req, res) => {
+	const q = (req.query.q as string) || "";
+	const project = (req.query.project as string) || "lallamastation";
+	const mode = (req.query.mode as "lexical" | "semantic" | "hybrid") || "hybrid";
+	try {
+		const results = q.trim() === "" 
+			? await appModule.memoryService.getContext(project, 50)
+			: await appModule.memoryService.searchMemories(q, project, mode, 50);
+		res.json(results);
+	} catch (e: any) {
+		res.status(500).json({ error: e.message });
+	}
+});
+
+app.delete("/api/memory/:id", authMiddleware, async (req, res) => {
+	try {
+		const success = await appModule.memoryService.deleteMemory(req.params.id);
+		if (success) res.json({ message: "Memory deleted" });
+		else res.status(404).json({ error: "Memory not found" });
+	} catch (e: any) {
+		res.status(500).json({ error: e.message });
+	}
+});
+
 // --- Endpoints MCP (SSE) with Auth ---
 
 let transport: SSEServerTransport | null = null;

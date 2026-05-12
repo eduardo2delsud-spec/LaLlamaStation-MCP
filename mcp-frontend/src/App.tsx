@@ -10,6 +10,7 @@ import { ModelList } from "./components/ModelList";
 import { SecurityPanel } from "./components/SecurityPanel";
 import { Telemetry } from "./components/Telemetry";
 import PerformanceMetrics from "./components/PerformanceMetrics";
+import { BrainConsole } from "./components/BrainConsole";
 import {
 	api,
 	clearApiKey,
@@ -501,6 +502,8 @@ const App: React.FC = () => {
 				return { title: "AI ENGINE TUNER", sub: "Consumo energético, contador de tokens y ahorro vs cloud" };
 			case "performance":
 				return { title: "PERFORMANCE METRICS", sub: "TTFT, Throughput y estadísticas de inferencia" };
+			case "cerebro":
+				return { title: "CEREBRO MCP", sub: "Conocimiento, decisiones y contexto de los agentes IA" };
 			case "coneccion":
 				return { title: "CONECCION", sub: "Configura API Key local y puente MCP" };
 			default:
@@ -771,6 +774,8 @@ const App: React.FC = () => {
 						<PerformanceMetrics />
 					</div>
 				);
+			case "cerebro":
+				return <BrainConsole />;
 			case "coneccion":
 				return (
 					<ConnectionPanel
@@ -828,6 +833,19 @@ const App: React.FC = () => {
 								<div className="expert-info">
 									<span className="expert-name">Playground</span>
 									<span className="expert-model">Inferencia Directa</span>
+								</div>
+							</div>
+
+							<div
+								className={`expert-item-wrap ${activeTab === "cerebro" ? "active" : ""}`}
+								onClick={() => setActiveTab("cerebro")}
+							>
+								<div className="expert-avatar" style={{ color: "var(--accent)" }}>
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/></svg>
+								</div>
+								<div className="expert-info">
+									<span className="expert-name">Cerebro MCP</span>
+									<span className="expert-model">Base de Conocimiento</span>
 								</div>
 							</div>
 						</div>

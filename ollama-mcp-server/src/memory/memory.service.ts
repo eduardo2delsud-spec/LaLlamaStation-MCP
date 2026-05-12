@@ -238,6 +238,32 @@ Does the target memory contradict the existing ones? Respond with YES or NO, fol
 		}
 	}
 
+	async getSessionSummary(sessionId: string): Promise<any> {
+		const db = this.dbService.getDb();
+		const session = await db.get(`SELECT * FROM sessions WHERE id = ?`, [sessionId]);
+		if (!session) return { error: "Session not found" };
+		const memories = await db.all(`SELECT * FROM memories WHERE sessionId = ?`, [sessionId]);
+		return { session, memories_count: memories.length, memories };
+	}
+
+	async compareMemories(model: string, memAId: string, memBId: string): Promise<any> {
+		const memA = await this.getMemory(memAId);
+		const memB = await this.getMemory(memBId);
+		
+		if (!memA || !memB) return { error: "One or both memories not found" };
+
+		try {
+			const prompt = `Compare these two memories and provide a brief analysis of their relationship, similarities, and any differences.
+Memory A: [${memA.type}] ${memA.title} - ${memA.content}
+Memory B: [${memB.type}] ${memB.title} - ${memB.content}
+Analysis:`;
+			const analysis = await this.ollamaService.generate(model, prompt, { temperature: 0.1, num_ctx: 2048 });
+			return { analysis, memA: memA.title, memB: memB.title };
+		} catch (e) {
+			return { error: "LLM comparison failed" };
+		}
+	}
+
 	private cosineSimilarity(A: number[], B: number[]): number {
 		let dotproduct = 0;
 		let mA = 0;
