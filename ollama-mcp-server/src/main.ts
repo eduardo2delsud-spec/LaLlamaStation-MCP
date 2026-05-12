@@ -55,7 +55,7 @@ const server = new Server(
 
 // Módulo de la aplicación (Estilo NestJS)
 const appModule = new AppModule();
-appModule.bootstrap(server, io);
+await appModule.bootstrap(server, io);
 
 // --- Middleware de Seguridad Avanzada (Fase 2) ---
 const securityMiddleware = (req: Request, res: Response, next: Function) => {

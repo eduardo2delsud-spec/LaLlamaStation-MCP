@@ -293,6 +293,19 @@ export class OllamaService {
 		return response.data.response;
 	}
 
+	async embed(model: string, input: string | string[]): Promise<number[][]> {
+		try {
+			const response = await this.axiosClient.post(`${this.baseUrl}/api/embed`, {
+				model,
+				input,
+			});
+			return response.data.embeddings || [];
+		} catch (error) {
+			console.error("[OllamaService] Error generating embeddings:", error);
+			return [];
+		}
+	}
+
 	async chat(
 		model: string,
 		messages: any[],

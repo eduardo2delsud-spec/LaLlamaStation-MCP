@@ -1,18 +1,18 @@
 # 🧠 Propuesta Técnica: Sistema de Memoria Persistente (Estilo Engram) en LaLlamaStation
 
-Este documento detalla la viabilidad, el diseño y la arquitectura para dotar a **LaLlamaStation MCP** de un sistema de **memoria persistente a largo plazo** para agentes de IA (al estilo de *Engram*), potenciando la plataforma de un simple panel de control a un **Middleware de Orquestación y Memoria Cognitiva**.
+Este documento detalla la viabilidad, el diseño y la arquitectura para dotar a **LaLlamaStation MCP** de un sistema de **memoria persistente a largo plazo** para agentes de IA, potenciando la plataforma de un simple panel de control a un **Middleware de Orquestación y Memoria Cognitiva Universal**.
 
 ---
 
 ## 1. Visión General: ¿Por qué en LaLlamaStation?
 
-Los agentes de IA (como Claude Code, Cursor, Antigravity o el propio Gemini) olvidan el contexto de desarrollo al cerrar la sesión o reiniciar el hilo de chat. *Engram* resuelve esto exponiendo un servidor MCP con herramientas de persistencia y búsqueda en SQLite.
+Los agentes de IA (como Claude Code, Cursor, OpenCode, Antigravity o el propio Gemini) olvidan el contexto de desarrollo al cerrar la sesión o reiniciar el hilo de chat, con esta propuesta de memoria persistente se resolvería este problema exponiendo un servidor MCP con herramientas de persistencia y búsqueda en SQLite y SQL.
 
 Al integrar este concepto en **LaLlamaStation**, obtenemos beneficios únicos que un binario aislado no puede ofrecer:
 
-1. **Cero Configuración Adicional**: Al usar LaLlamaStation como proxy MCP principal, los agentes obtienen las herramientas de memoria automáticamente junto con las de Ollama.
-2. **Superpoder Semántico (Ollama Embeddings)**: Mientras que Engram depende exclusivamente de búsqueda léxica (FTS5), LaLlamaStation puede generar **vectores de embeddings** usando modelos locales en Ollama (ej. `nomic-embed-text` o `all-minilm`) para ofrecer búsquedas semánticas híbridas ultra-precisas.
-3. **Consola Visual "Cerebro" (Frontend)**: Podemos diseñar una interfaz premium con glassmorphism en el dashboard de React, permitiendo al usuario auditar, buscar, editar, borrar y categorizar los recuerdos del agente de manera gráfica.
+1. **Servidor MCP Universal**: LaLlamaStation no solo controlará a Ollama, sino que actuará como el "Cerebro" central. **Cualquier agente (OpenCode, Cursor, etc.)** puede conectarse al puerto MCP de LaLlamaStation y usar las herramientas de memoria, independientemente de si usan Ollama o una API externa para generar código.
+2. **Superpoder Semántico (Ollama Embeddings)**: Mientras que algunas implementaciones de memoria persistente para agentes de IA dependen exclusivamente de búsqueda léxica (FTS5), LaLlamaStation puede generar **vectores de embeddings** usando modelos locales en Ollama (ej. `nomic-embed-text`) para ofrecer búsquedas semánticas híbridas ultra-precisas.
+3. **Consola Visual "Cerebro" (Frontend)**: Interfaz premium con glassmorphism en el dashboard de React, permitiendo al usuario auditar, buscar, editar, borrar y categorizar los recuerdos de todos sus agentes de manera gráfica.
 
 ---
 
@@ -22,14 +22,14 @@ El sistema se compone de tres capas perfectamente integradas en el ecosistema ac
 
 ```mermaid
 graph TD
-    subgraph Agente_IA [Agente de IA (Cursor/Claude Code/etc.)]
-        A[Llamada MCP]
+    subgraph Clientes_MCP [Agentes MCP (OpenCode, Cursor, Claude Code)]
+        A[Llamadas MCP (stdio o SSE)]
     end
 
     subgraph Backend [mcp-server (Node.js + TS)]
         B[MCP Server Router] -->|Ollama Tools| C[Ollama Service]
-        B -->|Memory Tools| D[Memory Service]
-        D -->|SQL & FTS5| E[(SQLite Local DB)]
+        B -->|Brain Tools| D[Memory Service]
+        D -->|SQL & FTS5| E[(SQLite DB: ./brain)]
         D -->|Genera Vectors| C
     end
 
@@ -41,85 +41,58 @@ graph TD
     C -->|Inferencia / Embeddings| H[(Ollama Engine)]
 ```
 
-### A. Capa de Datos (SQLite + FTS5)
-* **Motor**: SQLite3 integrado en Node.js (usando `sqlite3` o `sqlite` para promesas, altamente portátil y seguro de instalar en entornos multi-plataforma/Docker).
-* **Ubicación de la BD**: `.data/lallama-memory.db` (en el volumen persistente de Docker para evitar pérdidas).
-* **FTS5**: Activación de una tabla virtual FTS5 para indexar y buscar rápidamente de forma léxica en títulos, descripciones y lecciones aprendidas.
+### A. Capa de Datos (SQLite + FTS5 en `./brain`)
+* **Motor**: Usaremos `sqlite3` combinado con `sqlite` (wrapper de promesas). Es la opción más robusta y compatible para Node.js/Docker, evitando problemas de compilación de binarios C++ en diferentes sistemas operativos.
+* **Ubicación de la BD**: Se montará un volumen en la ruta `./brain/lallama-memory.db`, asegurando que los recuerdos persistan al reiniciar o reconstruir los contenedores Docker.
+* **FTS5**: Activación de tabla virtual FTS5 para indexar y buscar rápidamente de forma léxica.
 
 ### B. Capa de Inferencia Semántica (Ollama Vector Embeddings)
-* Cada vez que el agente llama a `mem_save`, el `MemoryService` extrae el contenido clave y hace una llamada interna asíncrona a Ollama para generar embeddings vectoriales del recuerdo.
-* Los vectores de floats (ej. dimensión 768) se guardan en una columna JSON de SQLite.
-* **Cálculo de Similitud**: Se realiza una comparación de distancia coseno en memoria (Node.js) al buscar. Como el volumen típico de recuerdos de un proyecto es de cientos o miles (no millones), esto es instantáneo y evita depender de bases de datos vectoriales complejas como Chroma o pgvector.
-
-### C. Capa de Eventos en Tiempo Real (Socket.IO)
-* Al guardar, actualizar o borrar recuerdos, el backend emite eventos (`memory-saved`, `memory-deleted`) a través de Socket.IO.
-* Esto permite que la interfaz web del usuario se actualice al instante a medida que el agente trabaja en segundo plano.
+* Cada vez que un agente llama a `mem_save`, el `MemoryService` extrae el contenido clave y hace una llamada interna asíncrona a Ollama para generar embeddings vectoriales del recuerdo.
+* **Cálculo de Similitud**: Se realiza una comparación de distancia coseno en memoria (Node.js) al buscar. Es instantáneo y evita depender de bases de datos vectoriales pesadas.
 
 ---
 
-## 3. Catálogo de Herramientas MCP Propuestas (10 Herramientas Clave)
+## 3. Catálogo de Herramientas MCP
 
-Para mantenerlo ágil, modular y altamente compatible con el ecosistema de agentes, proponemos implementar estas herramientas clave:
+| Herramienta | Propósito |
+|---|---|
+| `mem_save` | Guarda un nuevo recuerdo (decisión, bugfix, arquitectura, regla). |
+| `mem_update` | Actualiza un recuerdo existente. |
+| `mem_delete` | Elimina un recuerdo. |
+| `mem_search` | Busca recuerdos usando FTS5 o similitud de vectores de Ollama. |
+| `mem_context` | Recupera recuerdos recientes para inyectar contexto automático. |
+| `mem_timeline` | Obtiene una vista cronológica de los hitos del proyecto. |
+| `mem_session_start` | Inicia una sesión lógica de trabajo para agrupar recuerdos. |
+| `mem_session_end` | Finaliza la sesión y guarda un resumen estructurado. |
+| `mem_stats` | Devuelve métricas (número de recuerdos, distribución de tipos). |
+| `mem_suggest_tags` | Analiza el texto para proponer etiquetas adecuadas. |
 
-| Herramienta MCP | Parámetros Clave | Propósito |
+### Las 9 Herramientas Restantes 
+Para igualar al 100% las capacidades de otros MCPs o superarlas, podemos agregar estas herramientas. **Recomendamos fuertemente agregar las marcadas con ⭐**:
+
+| Herramienta Faltante | Propósito de otros MCPs | Recomendación para LaLlamaStation |
 |---|---|---|
-| `mem_save` | `title`, `content`, `type`, `tags`, `project` | Guarda un nuevo recuerdo (decisión, bugfix, arquitectura, regla). |
-| `mem_update` | `id`, `title`, `content`, `tags` | Actualiza un recuerdo existente. |
-| `mem_delete` | `id` | Elimina un recuerdo. |
-| `mem_search` | `query`, `project`, `mode` (`lexical` o `semantic`) | Busca recuerdos relevantes usando FTS5 o similitud de vectores de Ollama. |
-| `mem_context` | `project`, `limit` | Recupera recuerdos recientes para inyectar contexto automático. |
-| `mem_timeline` | `project`, `limit` | Obtiene una vista cronológica de los hitos del proyecto. |
-| `mem_session_start` | `session_name`, `project` | Inicia una sesión lógica de trabajo para agrupar recuerdos. |
-| `mem_session_end` | `session_id`, `summary` | Finaliza la sesión y guarda un resumen estructurado. |
-| `mem_stats` | `project` | Devuelve métricas (número de recuerdos, distribución de tipos, top tags). |
-| `mem_suggest_tags`| `title`, `content` | Analiza el texto para proponer etiquetas adecuadas. |
+| ⭐ `mem_get_observation` | Recupera un recuerdo específico por su ID. | **Agregar**. Muy útil cuando el agente ya conoce el ID y necesita el texto exacto rápido. |
+| ⭐ `mem_current_project` | Obtiene/establece el nombre del proyecto activo actual. | **Agregar**. Simplifica el flujo para no tener que enviar el nombre del proyecto en cada llamada. |
+| ⭐ `mem_judge` (Beta) | Usa un LLM para evaluar conflictos entre recuerdos similares. | **Agregar (¡Mejorada!)**. Al tener a Ollama localmente, podemos hacer que LaLlamaStation evalúe los conflictos usando un modelo local asíncronamente, sin consumir tokens de la API del agente. |
+| `mem_session_summary` | Obtiene el resumen de la sesión actual o pasada. | *Opcional*. Útil si el agente quiere recordar en qué quedó ayer. |
+| `mem_compare` | Compara dos proyectos o recuerdos distintos. | *Opcional*. Se puede implementar fácilmente. |
+| `mem_doctor` | Diagnóstico de salud de la base de datos de memoria. | *No necesaria*. Tendremos el Dashboard de React ("Cerebro") para hacer diagnósticos visuales. |
+| `mem_merge_projects` | Fusiona recuerdos de dos proyectos distintos. | *Opcional*. Se puede hacer mejor desde la interfaz visual de React. |
+| `mem_save_prompt` | Devuelve instrucciones sobre cómo estructurar un buen recuerdo. | *No necesaria*. Se puede inyectar en las descripciones de los esquemas de las herramientas. |
+| `mem_capture_passive` | Captura pasiva de datos en segundo plano. | *No aplicable*. Para servidores MCP orientados a chat interactivo, la captura activa es suficiente. |
 
 ---
 
 ## 4. Diseño del Frontend: La Consola "Cerebro" (React + Glassmorphism)
 
-Se propone agregar una pestaña **"Cerebro" (o "Memoria")** en el Dashboard actual. El diseño respetará estrictamente la estética **Premium Dark Mode** y contará con:
-
-1. **Métricas Principales (KPI Cards)**:
-   * Total de Recuerdos
-   * Sesiones de Trabajo Registradas
-   * Modelo de Embedding Activo (Ollama)
-2. **Timeline de Eventos interactivo**:
-   * Una línea de tiempo vertical de estilo futurista que muestra las decisiones, bugfixes y descubrimientos del agente con colores diferenciados por categoría.
-3. **Buscador Híbrido**:
-   * Barra de búsqueda con un interruptor deslizante para cambiar entre:
-     * 🔍 **Léxico (FTS5)**: Coincidencias exactas de palabras.
-     * 🧠 **Semántico (IA)**: Conceptos relacionados (por ejemplo, buscar "base de datos" y encontrar "SQLite" o "PostgreSQL" sin que las palabras coincidan textualmente).
-4. **Editor y Administrador de Recuerdos**:
-   * Un panel de detalle interactivo donde el desarrollador humano puede editar el texto del recuerdo, cambiar etiquetas, o borrar "alucinaciones" o información obsoleta con un click, garantizando control total sobre la memoria del agente.
+Se propone agregar una pestaña **"Cerebro" (o "Memoria")** en el Dashboard actual.
+* **Timeline y Dashboard**: Estadísticas y línea de tiempo de lo que el agente ha estado recordando en la carpeta `./brain`.
+* **Buscador Híbrido**: Toggle entre Búsqueda Léxica (FTS5) y Semántica (Vectores).
+* **Editor Visual**: El usuario podrá borrar recuerdos basura o editar el conocimiento del agente manualmente.
 
 ---
-
-## 5. Plan de Implementación de 4 Fases
-
-Si decides seguir adelante con esta característica en el futuro, podemos dividir el desarrollo en fases incrementales y seguras:
-
-### Fase 1: Base de Datos y Servicio de Memoria (Backend)
-* Instalar dependencias livianas de SQLite (`sqlite3` y `sqlite`).
-* Crear la estructura de tablas (`memories`, `sessions`, `embeddings`) y migraciones automáticas al arrancar.
-* Implementar `MemoryService` en Node.js.
-
-### Fase 2: Registro de Herramientas MCP
-* Integrar el catálogo de herramientas de memoria en `ollama.tools.ts` de forma opcional (que se puedan activar/desactivar en la configuración de LaLlamaStation).
-* Implementar los manejadores de solicitudes (`CallToolRequestSchema`) para cada herramienta de memoria.
-
-### Fase 3: Integración de Embeddings (Ollama)
-* Añadir lógica en `MemoryService` para consumir el endpoint de embeddings de Ollama de manera asíncrona.
-* Implementar el algoritmo de Similitud Coseno nativo para la búsqueda semántica.
-
-### Fase 4: Consola "Cerebro" en el Frontend
-* Crear la vista de Memoria en React con estilos e iconos premium (lucide-react).
-* Conectar Socket.IO para actualización en tiempo real y diseñar la visualización del timeline y buscador híbrido.
-
----
-
-> [!NOTE]
-> Esta adición transformaría a LaLlamaStation en uno de los servidores MCP locales más avanzados disponibles, uniendo la gestión de infraestructura y el almacenamiento del estado cognitivo en un solo lugar.
 
 > [!IMPORTANT]
-> **No se ha realizado ninguna modificación al código fuente del backend o frontend en este paso**, respetando la directiva de mantener la propuesta como un diseño previo para análisis y discusión.
+> **Estado Actual**: Seguimos en fase de diseño y planificación. No se ha escrito código.
+> **Decisión Pendiente**: De las 9 herramientas analizadas en la sección 3, ¿deseas incluir `mem_get_observation`, `mem_current_project` y `mem_judge`, o prefieres agregar alguna otra?
