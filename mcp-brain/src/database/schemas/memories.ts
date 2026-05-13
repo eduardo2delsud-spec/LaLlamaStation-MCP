@@ -1,0 +1,53 @@
+import { Database } from "sqlite";
+import sqlite3 from "sqlite3";
+
+export async function createMemoriesTable(db: Database<sqlite3.Database, sqlite3.Statement>) {
+	await db.exec(`
+		CREATE TABLE IF NOT EXISTS memories (
+			id TEXT PRIMARY KEY,
+			project TEXT NOT NULL,
+			type TEXT NOT NULL,
+			title TEXT NOT NULL,
+			content TEXT NOT NULL,
+			tags TEXT,
+			sessionId TEXT,
+			vector TEXT,
+			createdAt INTEGER NOT NULL,
+			updatedAt INTEGER NOT NULL,
+			FOREIGN KEY (sessionId) REFERENCES sessions (id)
+		);
+
+		-- FTS5 table for lexical search
+		CREATE VIRTUAL TABLE IF NOT EXISTS memories_fts USING fts5(
+			id UNINDEXED,
+			title,
+			content,
+			tags
+		);
+
+		-- Triggers to keep FTS in sync
+		CREATE TRIGGER IF NOT EXISTS memories_ai AFTER INSERT ON memories BEGIN
+			INSERT INTO memories_fts(rowid, id, title, content, tags) 
+			VALUES (new.rowid, new.id, new.title, new.content, new.tags);
+		END;
+
+		CREATE TRIGGER IF NOT EXISTS memories_au AFTER UPDATE ON memories BEGIN
+			UPDATE memories_fts SET 
+				title = new.title, 
+				content = new.content, 
+				tags = new.tags 
+			WHERE id = new.id;
+		END;
+
+		CREATE TRIGGER IF NOT EXISTS memories_ad AFTER DELETE ON memories BEGIN
+			DELETE FROM memories_fts WHERE id = old.id;
+		END;
+	`);
+
+	// Safely add topic_key to existing database
+	const columns = await db.all("PRAGMA table_info(memories)");
+	const hasTopicKey = columns.some((col: any) => col.name === "topic_key");
+	if (!hasTopicKey) {
+		await db.exec("ALTER TABLE memories ADD COLUMN topic_key TEXT;");
+	}
+}
