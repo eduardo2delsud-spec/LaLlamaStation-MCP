@@ -1,6 +1,6 @@
 import { Activity, Brain, Database, RefreshCw, Search, Tag, Trash2 } from "lucide-react";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { brainApi } from "../services/api.service";
 
 interface Memory {
@@ -25,9 +25,8 @@ export const BrainConsole: React.FC = () => {
 	const [query, setQuery] = useState("");
 	const [mode, setMode] = useState<"lexical" | "semantic" | "hybrid">("hybrid");
 	const [loading, setLoading] = useState(false);
-	const [project, setProject] = useState("lallamastation"); // Default project
-
-	const fetchMemories = async (searchQuery = query) => {
+	const [project, setProject] = useState("lallamastation");
+	const fetchMemories = useCallback(async (searchQuery = query) => {
 		setLoading(true);
 		try {
 			const [memRes, statRes] = await Promise.all([
@@ -41,11 +40,10 @@ export const BrainConsole: React.FC = () => {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [project, mode]);
 
 	useEffect(() => {
-		fetchMemories();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+		fetchMemories("");
 	}, [fetchMemories]);
 
 	const handleDelete = async (id: string) => {
@@ -60,7 +58,7 @@ export const BrainConsole: React.FC = () => {
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
-		fetchMemories();
+		fetchMemories(query);
 	};
 
 	return (
