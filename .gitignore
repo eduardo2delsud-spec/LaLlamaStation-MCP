@@ -28,11 +28,15 @@ Thumbs.db
 lallama-memory.db
 
 # IDEs
-.vscode/
+.vscode/settings.json
 .idea/
 *.swp
 *.swo
 
 # MCP project specific
-ollama-mcp-server/node_modules/
-ollama-mcp-server/dist/
+backend/node_modules/
+backend/dist/
+frontend/node_modules/
+frontend/dist/
+mcp-brain/node_modules/
+mcp-brain/dist/
