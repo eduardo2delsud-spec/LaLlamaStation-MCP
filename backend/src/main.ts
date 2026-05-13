@@ -33,7 +33,6 @@ import { rateLimit } from "express-rate-limit";
 import helmet from "helmet";
 import { Server as SocketServer } from "socket.io";
 import { AppModule } from "./app.module.js";
-import { MEMORY_TOOL_CATALOG } from "./memory/memory.tools.js";
 import { MCP_TOOL_CATALOG } from "./ollama/ollama.tools.js";
 
 const app = express();
@@ -411,7 +410,7 @@ app.post("/api/auth/mcp", authMiddleware, (req, res) => {
 app.get("/api/auth/mcp/tools", authMiddleware, (_req, res) => {
 	const permissions = appModule.authService.getMcpToolPermissions();
 	const byName = new Map(permissions.map((item) => [item.name, item.enabled]));
-	const ALL_TOOLS_CATALOG = [...MCP_TOOL_CATALOG, ...MEMORY_TOOL_CATALOG];
+	const ALL_TOOLS_CATALOG = [...MCP_TOOL_CATALOG];
 	const tools = ALL_TOOLS_CATALOG.map((tool) => ({
 		name: tool.name,
 		description: tool.description,
@@ -428,7 +427,7 @@ app.post("/api/auth/mcp/tools/:name", authMiddleware, (req, res) => {
 		return res.status(400).json({ error: "enabled debe ser boolean" });
 	}
 
-	const knownTool = [...MCP_TOOL_CATALOG, ...MEMORY_TOOL_CATALOG].some((tool) => tool.name === name);
+	const knownTool = [...MCP_TOOL_CATALOG].some((tool) => tool.name === name);
 	if (!knownTool) {
 		return res.status(404).json({ error: `Tool ${name} no existe` });
 	}
