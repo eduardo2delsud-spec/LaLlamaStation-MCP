@@ -9,6 +9,15 @@ RUN npm install
 
 # Copy source code and build
 COPY . .
+
+# Inyectar variables de entorno para Vite durante el Build
+ARG VITE_API_URL
+ARG VITE_SOCKET_URL
+ARG VITE_BRAIN_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_SOCKET_URL=$VITE_SOCKET_URL
+ENV VITE_BRAIN_API_URL=$VITE_BRAIN_API_URL
+
 RUN npm run build
 
 # Use Nginx to serve the build

@@ -70,13 +70,17 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:${APP_PORT:-3000}
+        - VITE_SOCKET_URL=http://localhost:${APP_PORT:-3000}
+        - VITE_BRAIN_API_URL=http://localhost:${BRAIN_PORT:-3001}
     container_name: frontend
     ports:
       - "8080:80"
     environment:
       # inside docker the backend is reachable by service name
-      - VITE_API_URL=http://backend:${APP_PORT:-3000}
-      - VITE_SOCKET_URL=http://backend:${APP_PORT:-3000}
+      - VITE_API_URL=http://localhost:${APP_PORT:-3000}
+      - VITE_SOCKET_URL=http://localhost:${APP_PORT:-3000}
     networks:
       - mcp-network
     depends_on:
@@ -88,8 +92,16 @@ services:
       context: ./mcp-brain
       dockerfile: Dockerfile
     container_name: brain
+    ports:
+      - "${BRAIN_PORT:-3001}:${BRAIN_PORT:-3001}"
+    environment:
+      - BRAIN_PORT=${BRAIN_PORT:-3001}
+      - OLLAMA_API_URL=http://ollama:11434
+      # - API_KEY=${API_KEY:-super-secret-mcp-key} # Descomenta si habilitas seguridad en el cerebro
     volumes:
-      - brain_data:/root/.brain
+      - brain_data:/app/data
+    depends_on:
+      - ollama
     networks:
       - mcp-network
     restart: always
