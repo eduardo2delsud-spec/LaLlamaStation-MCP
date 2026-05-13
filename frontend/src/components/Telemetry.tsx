@@ -1,5 +1,5 @@
 import {
-	BarChart2,
+	Brain,
 	Check,
 	Clock,
 	Copy,
@@ -22,9 +22,10 @@ import type { StatusResponse } from "../types/api";
 interface TelemetryProps {
 	status?: StatusResponse;
 	onOllamaControl?: (action: "start" | "stop" | "restart") => Promise<void>;
+	onRefresh?: () => void;
 }
 
-export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl }) => {
+export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl, onRefresh }) => {
 	const [ngrokLoading, setNgrokLoading] = useState(false);
 	const [ollamaLoading, setOllamaLoading] = useState(false);
 	const [ngrokRunning, setNgrokRunning] = useState<boolean | null>(null);
@@ -127,6 +128,24 @@ export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl })
 		},
 		[isMcpAuthEnabled, isOllamaAuthEnabled]
 	);
+
+	const [brainLoading, setBrainLoading] = useState(false);
+
+	const toggleBrain = useCallback(async () => {
+		setBrainLoading(true);
+		try {
+			const endpoint = status?.brainRunning ? "/api/brain/stop" : "/api/brain/start";
+			await api.post(endpoint, {});
+			if (onRefresh) {
+				setTimeout(onRefresh, 2000);
+			}
+		} catch (e: unknown) {
+			const errorMsg = e instanceof Error ? e.message : (e as any)?.response?.data?.error || String(e);
+			alert(`Error controlando cerebro: ${errorMsg}`);
+		} finally {
+			setBrainLoading(false);
+		}
+	}, [status?.brainRunning, onRefresh]);
 
 	if (!status)
 		return (
@@ -279,18 +298,20 @@ export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl })
 				</div>
 
 				{/* Ngrok */}
-				<div className="kpi-card" style={{ borderColor: ngrokActive ? "rgba(16,185,129,0.3)" : undefined }}>
+				<div
+					className="kpi-card"
+					style={{ borderColor: ngrokActive ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)" }}
+				>
 					<span className="kpi-label">Túnel Ngrok</span>
 					<div className="flex-between" style={{ marginBottom: "6px" }}>
 						<span
 							className="kpi-value"
 							style={{
-								fontSize: "14px",
-								fontFamily: "var(--font-mono)",
-								color: ngrokActive ? "var(--success)" : "var(--text-dim)",
+								fontSize: "24px",
+								color: ngrokActive ? "var(--success)" : "var(--error)",
 							}}
 						>
-							{ngrokActive ? "ACTIVO" : "LOCAL"}
+							{ngrokActive ? "ONLINE" : "OFFLINE"}
 						</span>
 						<button
 							onClick={toggleNgrok}
@@ -354,18 +375,55 @@ export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl })
 					)}
 				</div>
 
-				{/* Sesiones */}
-				<div className="kpi-card">
-					<span className="kpi-label">Actividad Total</span>
-					<div className="flex-between">
-						<span className="kpi-value" style={{ fontSize: "28px" }}>
-							{status?.totalRequests || 0}
+				{/* Cerebro MCP */}
+				<div
+					className="kpi-card"
+					style={{ borderColor: status?.brainRunning ? "rgba(79, 140, 255, 0.2)" : "rgba(239,68,68,0.2)" }}
+				>
+					<span className="kpi-label">Cerebro MCP</span>
+					<div className="flex-between" style={{ marginBottom: "6px" }}>
+						<span
+							className="kpi-value"
+							style={{
+								fontSize: "24px",
+								color: status?.brainRunning ? "var(--accent)" : "var(--error)",
+							}}
+						>
+							{status?.brainRunning ? "ONLINE" : "OFFLINE"}
 						</span>
-						<BarChart2 size={22} style={{ opacity: 0.15 }} />
+						<button
+							onClick={toggleBrain}
+							disabled={brainLoading}
+							style={{
+								background: status?.brainRunning ? "rgba(239,68,68,0.15)" : "rgba(79, 140, 255, 0.15)",
+								border: `1px solid ${status?.brainRunning ? "rgba(239,68,68,0.3)" : "rgba(79, 140, 255, 0.3)"}`,
+								borderRadius: "8px",
+								padding: "5px 10px",
+								cursor: "pointer",
+								color: status?.brainRunning ? "var(--error)" : "var(--accent)",
+								display: "flex",
+								alignItems: "center",
+								gap: "4px",
+								fontSize: "11px",
+								fontWeight: 700,
+								transition: "var(--transition)",
+							}}
+						>
+							{brainLoading ? (
+								<Loader size={12} className="animate-spin" />
+							) : (
+								<>
+									<Power size={12} /> {status?.brainRunning ? "STOP" : "START"}
+								</>
+							)}
+						</button>
 					</div>
-					<p style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "4px" }}>
-						requests procesados
-					</p>
+					<div className="flex-between">
+						<p style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "4px" }}>
+							Base de conocimiento FTS5
+						</p>
+						<Brain size={22} style={{ opacity: 0.15 }} />
+					</div>
 				</div>
 
 				{/* API Key - Ollama */}

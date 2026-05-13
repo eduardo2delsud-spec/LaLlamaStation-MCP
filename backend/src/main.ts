@@ -321,7 +321,15 @@ app.post("/v1/chat/completions", authMiddleware, async (req, res) => {
 app.get("/api/status/fast", authMiddleware, async (_req, res) => {
 	try {
 		const status = await appModule.ollamaService.getFastStatus();
-		res.json(withAuthConfig(status));
+		let brainRunning = false;
+		try {
+			const container = docker.getContainer(BRAIN_CONTAINER);
+			const info = await container.inspect();
+			brainRunning = info.State?.Running === true;
+		} catch {
+			brainRunning = false;
+		}
+		res.json(withAuthConfig({ ...status, brainRunning }));
 	} catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
@@ -331,43 +339,15 @@ app.get("/api/status/fast", authMiddleware, async (_req, res) => {
 app.get("/api/status/full", authMiddleware, async (_req, res) => {
 	try {
 		const status = await appModule.ollamaService.getServerStatus();
-		res.json(withAuthConfig(status));
-	} catch (error: any) {
-		res.status(500).json({ error: error.message });
-	}
-});
-
-// Performance metrics: TTFT, throughput, etc
-app.get("/api/metrics/performance", authMiddleware, (_req, res) => {
-	try {
-		const stats = appModule.ollamaService.getStats();
-		const ttftHistory = (stats.ttftHistory || []) as number[];
-		const tokensPerSecHistory = (stats.tokensPerSecHistor || []) as number[];
-
-		// Calculate averages
-		const avgTtft = ttftHistory.length > 0 ? ttftHistory.reduce((a, b) => a + b, 0) / ttftHistory.length : 0;
-		const p95Ttft =
-			ttftHistory.length > 0 ? ttftHistory.sort((a, b) => a - b)[Math.floor(ttftHistory.length * 0.95)] : 0;
-		const maxTtft = ttftHistory.length > 0 ? Math.max(...ttftHistory) : 0;
-
-		const avgTokPerSec =
-			tokensPerSecHistory.length > 0
-				? tokensPerSecHistory.reduce((a, b) => a + b, 0) / tokensPerSecHistory.length
-				: 0;
-
-		res.json({
-			ttft: {
-				avg: avgTtft.toFixed(0),
-				p95: p95Ttft.toFixed(0),
-				max: maxTtft.toFixed(0),
-				samples: ttftHistory.length,
-			},
-			throughput: {
-				avgTokensPerSec: avgTokPerSec.toFixed(2),
-				samples: tokensPerSecHistory.length,
-			},
-			timestamp: new Date().toISOString(),
-		});
+		let brainRunning = false;
+		try {
+			const container = docker.getContainer(BRAIN_CONTAINER);
+			const info = await container.inspect();
+			brainRunning = info.State?.Running === true;
+		} catch {
+			brainRunning = false;
+		}
+		res.json(withAuthConfig({ ...status, brainRunning }));
 	} catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
@@ -377,7 +357,15 @@ app.get("/api/metrics/performance", authMiddleware, (_req, res) => {
 app.get("/api/status", authMiddleware, async (_req, res) => {
 	try {
 		const status = await appModule.ollamaService.getServerStatus();
-		res.json(withAuthConfig(status));
+		let brainRunning = false;
+		try {
+			const container = docker.getContainer(BRAIN_CONTAINER);
+			const info = await container.inspect();
+			brainRunning = info.State?.Running === true;
+		} catch {
+			brainRunning = false;
+		}
+		res.json(withAuthConfig({ ...status, brainRunning }));
 	} catch (error: any) {
 		res.status(500).json({ error: error.message });
 	}
@@ -559,7 +547,16 @@ app.post("/api/engine-stats/cloud-price", authMiddleware, (req, res) => {
 // --- Control de Ngrok via Docker API ---
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
 const NGROK_CONTAINER = process.env.NGROK_CONTAINER_NAME || "mcp-ngrok-tunnel";
+const BRAIN_CONTAINER = process.env.BRAIN_CONTAINER_NAME || "brain";
 let ngrokAuthtokenConfigured = Boolean(process.env.NGROK_AUTHTOKEN?.trim());
+
+async function getBrainContainer() {
+	try {
+		return docker.getContainer(BRAIN_CONTAINER);
+	} catch {
+		return null;
+	}
+}
 
 async function getNgrokContainer() {
 	try {
@@ -726,6 +723,29 @@ app.post("/api/ollama/restart", authMiddleware, async (_req, res) => {
 		if (!container) return res.status(404).json({ error: "Contenedor Ollama no encontrado." });
 		await container.restart();
 		res.json({ message: "Motor Ollama reiniciado" });
+	} catch (e: any) {
+		res.status(500).json({ error: e.message });
+	}
+});
+
+// --- Control de Cerebro MCP via Docker API ---
+app.post("/api/brain/start", authMiddleware, async (_req, res) => {
+	try {
+		const container = await getBrainContainer();
+		if (!container) return res.status(404).json({ error: "Contenedor mcp-brain no encontrado." });
+		await container.start();
+		res.json({ message: "Cerebro MCP iniciado", running: true });
+	} catch (e: any) {
+		res.status(500).json({ error: e.message });
+	}
+});
+
+app.post("/api/brain/stop", authMiddleware, async (_req, res) => {
+	try {
+		const container = await getBrainContainer();
+		if (!container) return res.status(404).json({ error: "Contenedor mcp-brain no encontrado." });
+		await container.stop();
+		res.json({ message: "Cerebro MCP detenido", running: false });
 	} catch (e: any) {
 		res.status(500).json({ error: e.message });
 	}

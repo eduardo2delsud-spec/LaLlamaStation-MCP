@@ -11,7 +11,7 @@ export class DatabaseService {
 		const brainDir = path.resolve(process.cwd(), "data");
 		if (!fs.existsSync(brainDir)) {
 			fs.mkdirSync(brainDir, { recursive: true });
-			console.log(`[Database] Created brain directory at ${brainDir}`);
+			console.error(`[Database] Created brain directory at ${brainDir}`);
 		}
 
 		const dbPath = path.join(brainDir, "lallama-memory.db");
@@ -29,7 +29,7 @@ export class DatabaseService {
 		const green = "\x1b[32m";
 		const reset = "\x1b[0m";
 
-		console.log(`
+		console.error(`
         ${green}✅ Database Connection Established${reset}
         -----------------------------------
         ${yellow}Type:${reset}     ${cyan}SQLite3 (FTS5 Enabled)${reset}

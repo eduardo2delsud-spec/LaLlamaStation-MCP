@@ -8,7 +8,6 @@ import { ConnectionPanel } from "./components/ConnectionPanel";
 import { HardwareSentinel } from "./components/HardwareSentinel";
 import { IpLogs } from "./components/IpLogs";
 import { ModelList } from "./components/ModelList";
-import PerformanceMetrics from "./components/PerformanceMetrics";
 import { SecurityPanel } from "./components/SecurityPanel";
 import { Telemetry } from "./components/Telemetry";
 import {
@@ -495,8 +494,6 @@ const App: React.FC = () => {
 				return { title: "HARDWARE SENTINEL", sub: "Monitor de GPU, VRAM y configuración de rendimiento" };
 			case "engine":
 				return { title: "AI ENGINE TUNER", sub: "Consumo energético, contador de tokens y ahorro vs cloud" };
-			case "performance":
-				return { title: "PERFORMANCE METRICS", sub: "TTFT, Throughput y estadísticas de inferencia" };
 			case "cerebro":
 				return { title: "CEREBRO MCP", sub: "Conocimiento, decisiones y contexto de los agentes IA" };
 			case "coneccion":
@@ -511,7 +508,7 @@ const App: React.FC = () => {
 			case "dashboard":
 				return (
 					<>
-						<Telemetry status={status} onOllamaControl={handleOllamaControl} />
+						<Telemetry status={status} onOllamaControl={handleOllamaControl} onRefresh={fetchData} />
 						<div
 							style={{
 								display: "grid",
@@ -763,12 +760,6 @@ const App: React.FC = () => {
 				return <HardwareSentinel status={status} />;
 			case "engine":
 				return <AiEngineTuner status={status} />;
-			case "performance":
-				return (
-					<div className="card-glass" style={{ padding: "24px" }}>
-						<PerformanceMetrics />
-					</div>
-				);
 			case "cerebro":
 				return <BrainConsole />;
 			case "coneccion":
@@ -880,9 +871,6 @@ const App: React.FC = () => {
 							</button>
 							<button className="cmd-pill" onClick={() => setActiveTab("engine")}>
 								<Zap size={14} /> Engine Tuner
-							</button>
-							<button className="cmd-pill" onClick={() => setActiveTab("performance")}>
-								<Activity size={14} /> Performance
 							</button>
 						</div>
 					</div>

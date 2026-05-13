@@ -390,8 +390,16 @@ async function bootstrap() {
 		}
 	});
 
-	app.listen(PORT, () => {
+	const serverInstance = app.listen(PORT, () => {
 		console.error(`[Brain UI API] Dashboard API listening on port ${PORT}`);
+	});
+
+	serverInstance.on("error", (err: any) => {
+		if (err.code === "EADDRINUSE") {
+			console.error(`[Brain UI API] Warning: Port ${PORT} already in use. Running in Stdio-only mode.`);
+		} else {
+			console.error(`[Brain UI API] Server error:`, err);
+		}
 	});
 }
 
