@@ -12,7 +12,7 @@ export async function startMcpServer(dbService: DatabaseService) {
 		},
 		{
 			capabilities: { tools: {} },
-			instructions: `Engram provides persistent memory that survives across sessions and compactions.
+			instructions: `Provides persistent memory that survives across sessions and compactions.
 
 CORE TOOLS (always available):
   mem_save — save decisions, bugs, discoveries, conventions PROACTIVELY (do not wait to be asked)

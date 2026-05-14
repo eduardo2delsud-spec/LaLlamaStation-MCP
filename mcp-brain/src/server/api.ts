@@ -203,8 +203,14 @@ export function startApiServer(dbService: DatabaseService) {
 		}
 	});
 
+	// Endpoint para acceso remoto vía HTTP/SSE
+	app.get("/mcp", (_req, res) => {
+		res.json({ status: "ok", message: "LaLlamaStation Brain MCP Server", timestamp: new Date().toISOString() });
+	});
+
 	const serverInstance = app.listen(PORT, () => {
 		console.error(`[Brain UI API] Dashboard API listening on port ${PORT}`);
+		console.error(`[Brain MCP] Accessible remotely at: http://localhost:${PORT}/mcp`);
 	});
 
 	serverInstance.on("error", (err: NodeJS.ErrnoException) => {
