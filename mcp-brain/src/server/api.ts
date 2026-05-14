@@ -3,8 +3,10 @@ import os from "node:os";
 import path from "node:path";
 import cors from "cors";
 import express from "express";
+import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import type { DatabaseService } from "../database/connection.js";
 import { analysis, memories, settings } from "../services/index.js";
+import { createMcpServer } from "./mcp.js";
 
 const PORT = process.env.BRAIN_PORT || 3015;
 
@@ -208,9 +210,32 @@ export function startApiServer(dbService: DatabaseService) {
 		res.json({ status: "ok", message: "LaLlamaStation Brain MCP Server", timestamp: new Date().toISOString() });
 	});
 
+	// --- MCP SSE Transport ---
+
+	const sseServer = createMcpServer(dbService);
+	const sseTransports = new Map<string, SSEServerTransport>();
+
+	app.get("/sse", async (req, res) => {
+		const transport = new SSEServerTransport("/messages", res);
+		sseTransports.set(transport.sessionId, transport);
+		res.on("close", () => sseTransports.delete(transport.sessionId));
+		await sseServer.connect(transport);
+	});
+
+	app.post("/messages", async (req, res) => {
+		const sessionId = req.query.sessionId as string;
+		const transport = sessionId ? sseTransports.get(sessionId) : null;
+		if (transport) {
+			await transport.handlePostMessage(req, res);
+		} else {
+			res.status(400).send("No active SSE session");
+		}
+	});
+
 	const serverInstance = app.listen(PORT, () => {
 		console.error(`[Brain UI API] Dashboard API listening on port ${PORT}`);
 		console.error(`[Brain MCP] Accessible remotely at: http://localhost:${PORT}/mcp`);
+		console.error(`[Brain MCP SSE] SSE endpoint: http://localhost:${PORT}/sse`);
 	});
 
 	serverInstance.on("error", (err: NodeJS.ErrnoException) => {

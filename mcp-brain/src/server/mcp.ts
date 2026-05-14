@@ -4,7 +4,9 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprot
 import type { DatabaseService } from "../database/connection.js";
 import { analysis, memories, sessions } from "../services/index.js";
 
-export async function startMcpServer(dbService: DatabaseService) {
+let currentProject: string | null = null;
+
+export function createMcpServer(dbService: DatabaseService): Server {
 	const mcpServer = new Server(
 		{
 			name: "lallamastation-brain",
@@ -40,8 +42,6 @@ IF judgment_required IS TRUE:
   RESOLVE silently when confidence >= 0.7 AND relation is not supersedes/conflicts_with.`,
 		} as { capabilities: { tools: Record<string, unknown> }; instructions: string }
 	);
-
-	let currentProject: string | null = null;
 
 	mcpServer.setRequestHandler(ListToolsRequestSchema, async () => {
 		return {
@@ -511,6 +511,11 @@ PARAMS:
 		}
 	});
 
+	return mcpServer;
+}
+
+export async function startMcpServer(dbService: DatabaseService) {
+	const mcpServer = createMcpServer(dbService);
 	const transport = new StdioServerTransport();
 	await mcpServer.connect(transport);
 	console.error(`[Brain MCP] MCP Server running on Stdio`);
