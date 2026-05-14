@@ -39,8 +39,8 @@ export class DatabaseService {
 	}
 
 	public async initialize(): Promise<void> {
-		// Determinamos la ruta de la base de datos de forma robusta tanto en Docker (/app/data) como en local (raíz/data)
-		const dbDir = process.env.DATA_DIR || path.resolve(process.cwd(), process.cwd().endsWith("mcp-brain") ? "../data" : "data");
+		// Determinamos la ruta absoluta de forma infalible analizando si estamos corriendo desde 'dist' (Docker/Prod) o 'src' (Desarrollo/MCP)
+		const dbDir = process.env.DATA_DIR || (__dirname.includes("dist") ? path.resolve(__dirname, "../../data") : path.resolve(__dirname, "../../../data"));
 		if (!fs.existsSync(dbDir)) {
 			fs.mkdirSync(dbDir, { recursive: true });
 		}

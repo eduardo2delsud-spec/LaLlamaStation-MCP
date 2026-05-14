@@ -6,7 +6,7 @@ import express from "express";
 import type { DatabaseService } from "../database/connection.js";
 import { analysis, memories, settings } from "../services/index.js";
 
-const PORT = process.env.BRAIN_PORT || 3001;
+const PORT = process.env.BRAIN_PORT || 3015;
 
 export function startApiServer(dbService: DatabaseService) {
 	const app = express();
@@ -18,7 +18,7 @@ export function startApiServer(dbService: DatabaseService) {
 		const { target } = req.body;
 		try {
 			const ollamaUrl = process.env.OLLAMA_API_URL || "http://127.0.0.1:11434";
-			const brainPort = process.env.BRAIN_PORT || "3001";
+			const brainPort = process.env.BRAIN_PORT || "3015";
 			const scriptPath = path.resolve(process.cwd(), "src/index.ts").replace(/\\/g, "/");
 
 			const mcpConfigBlock = {
