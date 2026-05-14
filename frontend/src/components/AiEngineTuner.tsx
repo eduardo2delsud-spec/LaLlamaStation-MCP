@@ -43,7 +43,7 @@ function GaugeRing({
 	const dash = pct * circ;
 	return (
 		<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-			<svg width="100" height="100" viewBox="0 0 100 100">
+			<svg aria-label="Gauge" width="100" height="100" viewBox="0 0 100 100">
 				<circle cx="50" cy="50" r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
 				<circle
 					cx="50"
@@ -156,6 +156,7 @@ export const AiEngineTuner: React.FC<AiEngineTunerProps> = ({ status }) => {
 						GPU en Tiempo Real
 					</h2>
 					<button
+						type="button"
 						onClick={fetchEngineStats}
 						style={{
 							background: "transparent",
@@ -543,6 +544,7 @@ export const AiEngineTuner: React.FC<AiEngineTunerProps> = ({ status }) => {
 				<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
 					<div>
 						<label
+							htmlFor="rate-ars"
 							style={{
 								fontSize: "11px",
 								color: "var(--text-muted)",
@@ -555,6 +557,7 @@ export const AiEngineTuner: React.FC<AiEngineTunerProps> = ({ status }) => {
 							Tarifa Electrica Local (ARS/kWh)
 						</label>
 						<input
+							id="rate-ars"
 							type="number"
 							min={1}
 							step={10}
@@ -569,6 +572,7 @@ export const AiEngineTuner: React.FC<AiEngineTunerProps> = ({ status }) => {
 					</div>
 					<div>
 						<label
+							htmlFor="cloud-price"
 							style={{
 								fontSize: "11px",
 								color: "var(--text-muted)",
@@ -581,6 +585,7 @@ export const AiEngineTuner: React.FC<AiEngineTunerProps> = ({ status }) => {
 							Precio Cloud de Referencia (USD / 1M tokens)
 						</label>
 						<input
+							id="cloud-price"
 							type="number"
 							min={0.1}
 							step={0.5}
@@ -596,6 +601,7 @@ export const AiEngineTuner: React.FC<AiEngineTunerProps> = ({ status }) => {
 				</div>
 				<div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "20px" }}>
 					<button
+						type="button"
 						className="auth-btn"
 						disabled={saving}
 						style={{ width: "auto", padding: "0 32px", display: "flex", alignItems: "center", gap: "8px" }}

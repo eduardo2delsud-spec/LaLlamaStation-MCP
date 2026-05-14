@@ -371,7 +371,7 @@ PARAMS:
 						dbService,
 						args?.query as string,
 						args?.project as string,
-						(args?.mode as string) || "hybrid",
+						(args?.mode as "lexical" | "semantic" | "hybrid" | undefined) || "hybrid",
 						(args?.limit as number) || 10
 					);
 					return { content: [{ type: "text", text: JSON.stringify(mems, null, 2) }] };

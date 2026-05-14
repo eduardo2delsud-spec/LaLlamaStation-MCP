@@ -14,10 +14,11 @@ import {
 import type React from "react";
 import { useCallback, useState } from "react";
 import { api } from "../services/api.service";
+import type { OllamaModel, PullProgressData } from "../types/api";
 
 interface ModelListProps {
-	models: any[];
-	pullProgress: any;
+	models: OllamaModel[];
+	pullProgress: PullProgressData | null;
 	onPull: (name: string) => void;
 	onDelete: (name: string) => void;
 }
@@ -72,11 +73,11 @@ const FALLBACK_MODELS = [
 export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPull, onDelete }) => {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [directPullTerm, setDirectPullTerm] = useState("");
-	const [searchResults, setSearchResults] = useState<any[]>([]);
+	const [searchResults, setSearchResults] = useState<Record<string, any>[]>([]);
 	const [isSearching, setIsSearching] = useState(false);
 	const [searchError, setSearchError] = useState("");
 	const [hasSearched, setHasSearched] = useState(false);
-	const [verificationModel, setVerificationModel] = useState<any | null>(null);
+	const [verificationModel, setVerificationModel] = useState<Record<string, any> | null>(null);
 
 	const installedNames = models?.filter((m) => !!m?.name).map((m) => m.name as string) || [];
 
@@ -252,7 +253,7 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 					) : (
 						models
 							.filter((m) => !!m?.name)
-							.map((model: any) => {
+							.map((model: OllamaModel) => {
 								const sizeGb = model?.size > 0 ? (model.size / 1024 ** 3).toFixed(2) : null;
 								return (
 									<div
@@ -316,6 +317,7 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 										</div>
 										<div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
 											<button
+												type="button"
 												className="btn-icon"
 												onClick={() => onPull(model.name)}
 												title="Actualizar"
@@ -323,6 +325,7 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 												<RefreshCw size={16} />
 											</button>
 											<button
+												type="button"
 												className="btn-icon"
 												onClick={() => {
 													if (confirm(`¿Eliminar ${model.name}?`)) onDelete(model.name);
@@ -438,6 +441,7 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 						/>
 					</div>
 					<button
+						type="button"
 						className="auth-btn"
 						style={{ width: "auto", padding: "0 24px", display: "flex", alignItems: "center", gap: "8px" }}
 						onClick={handleDirectPull}
@@ -477,6 +481,7 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 						/>
 					</div>
 					<button
+						type="button"
 						className="auth-btn"
 						style={{
 							width: "auto",
@@ -496,6 +501,7 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 
 					{/* Filtros Rápidos */}
 					<button
+						type="button"
 						className="btn-icon"
 						style={{
 							background: "rgba(255,255,255,0.05)",
@@ -514,6 +520,7 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 						Populares
 					</button>
 					<button
+						type="button"
 						className="btn-icon"
 						style={{
 							background: "rgba(255,255,255,0.05)",
@@ -535,6 +542,7 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 					{/* Botón de Limpiar */}
 					{(hasSearched || searchTerm) && (
 						<button
+							type="button"
 							className="btn-icon"
 							style={{
 								background: "rgba(245,158,11,0.1)",
@@ -584,11 +592,12 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 							<p style={{ marginTop: "12px", fontSize: "12px" }}>Consultando ollama.com...</p>
 						</div>
 					) : (
-						displayModels.map((s: any) => {
+						displayModels.map((s: Record<string, any>) => {
 							const isInstalled = installedNames.some((n) => n.startsWith(s.name.split(":")[0]));
 							return (
-								<div
-									key={s.name}
+								<button
+									type="button"
+									key={s.name as string}
 									className="suggested-card"
 									onClick={() => !isInstalled && setVerificationModel(s)}
 								>
@@ -653,7 +662,7 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 											<Download size={12} /> DESCARGAR
 										</div>
 									)}
-								</div>
+								</button>
 							);
 						})
 					)}
@@ -662,8 +671,15 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 
 			{/* Modal de Verificación */}
 			{verificationModel && (
-				<div className="modal-overlay" onClick={() => setVerificationModel(null)}>
-					<div className="verification-modal" onClick={(e) => e.stopPropagation()}>
+				<button type="button" className="modal-overlay" onClick={() => setVerificationModel(null)}>
+					<div
+						className="verification-modal"
+						role="dialog"
+						onClick={(e) => e.stopPropagation()}
+						onKeyDown={(e) => {
+							if (e.key === "Enter" || e.key === " ") e.stopPropagation();
+						}}
+					>
 						<div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
 							<div
 								style={{ background: "rgba(79, 140, 255, 0.1)", padding: "10px", borderRadius: "12px" }}
@@ -740,6 +756,7 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 
 						<div className="modal-actions">
 							<button
+								type="button"
 								className="btn-icon"
 								style={{
 									flex: 1,
@@ -753,6 +770,7 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 								Cancelar
 							</button>
 							<button
+								type="button"
 								className="auth-btn"
 								style={{
 									flex: 2,
@@ -769,7 +787,7 @@ export const ModelList: React.FC<ModelListProps> = ({ models, pullProgress, onPu
 							</button>
 						</div>
 					</div>
-				</div>
+				</button>
 			)}
 		</div>
 	);

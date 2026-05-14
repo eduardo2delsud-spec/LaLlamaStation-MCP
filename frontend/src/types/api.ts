@@ -10,13 +10,19 @@ export interface StatusResponse {
 	vramTotalMb?: number;
 	vramUsedMb?: number;
 	models?: LoadedModel[];
+	loadedModels?: LoadedModel[];
 	recentLogs?: AccessLogEntry[];
 	brainRunning?: boolean;
+	ollamaRunning?: boolean;
+	uptime?: string;
+	diskSpace?: { free: number; total: number; used: number };
+	ngrokInfo?: { active: boolean; url: string };
+	hardware?: { available?: number; free?: number; total?: number; used?: number; vram?: VramInfo };
 	auth?: {
 		ollamaAuthEnabled?: boolean;
 		mcpAuthEnabled?: boolean;
 	};
-	[key: string]: unknown;
+	[key: string]: any;
 }
 
 export interface AccessLogEntry {
@@ -32,28 +38,32 @@ export interface OllamaModel {
 	modified_at: string;
 	size: number;
 	digest: string;
-	[key: string]: unknown;
+	details?: {
+		parameter_size?: string;
+		quantization_level?: string;
+	};
+	[key: string]: any;
 }
 
 export interface LoadedModel {
-	name?: string | unknown;
+	name: string;
 	size_vram?: number;
 	percentage?: number;
-	[key: string]: unknown;
+	[key: string]: any;
 }
 
-export type PullProgressData = Record<string, unknown>;
+export type PullProgressData = Record<string, any>;
 
 export interface ChatMessage {
 	role: "user" | "assistant";
 	content: string;
-	[key: string]: unknown;
+	[key: string]: any;
 }
 
-export interface EngineStats extends Record<string, unknown> {
+export interface EngineStats extends Record<string, any> {
 	totalTokensSession?: number;
 	totalTimeSession?: number;
-	[key: string]: unknown;
+	[key: string]: any;
 }
 
 export interface VramInfo {
@@ -68,5 +78,5 @@ export interface ChatCompletionOptions {
 	num_ctx?: number;
 	top_p?: number;
 	top_k?: number;
-	[key: string]: unknown;
+	[key: string]: any;
 }

@@ -207,7 +207,7 @@ export function startApiServer(dbService: DatabaseService) {
 		console.error(`[Brain UI API] Dashboard API listening on port ${PORT}`);
 	});
 
-	serverInstance.on("error", (err: Error) => {
+	serverInstance.on("error", (err: NodeJS.ErrnoException) => {
 		if (err.code === "EADDRINUSE") {
 			console.error(`[Brain UI API] Warning: Port ${PORT} already in use. Running in Stdio-only mode.`);
 		} else {

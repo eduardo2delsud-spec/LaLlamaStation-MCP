@@ -63,6 +63,7 @@ export const SecurityPanel: React.FC<SecurityPanelProps> = ({ blacklistedIps, on
 									{ip}
 								</span>
 								<button
+									type="button"
 									onClick={() => onUnban(ip)}
 									className="btn btn-secondary"
 									style={{ padding: "4px 8px", borderRadius: "6px" }}

@@ -25,8 +25,9 @@ const validateEnv = () => {
 validateEnv();
 
 const root = document.getElementById("root");
-if (root) createRoot(root).render(
-	<StrictMode>
-		<App />
-	</StrictMode>
-);
+if (root)
+	createRoot(root).render(
+		<StrictMode>
+			<App />
+		</StrictMode>
+	);

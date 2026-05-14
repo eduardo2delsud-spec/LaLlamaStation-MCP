@@ -343,6 +343,7 @@ export const HardwareSentinel: React.FC<HardwareSentinelProps> = ({ status }) =>
 						const fits = vram?.available ? estimatedMb < vram.free : true;
 						return (
 							<button
+								type="button"
 								key={q.value}
 								onClick={() => setSelectedQuant(q.value)}
 								style={{
@@ -422,6 +423,7 @@ export const HardwareSentinel: React.FC<HardwareSentinelProps> = ({ status }) =>
 						<div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
 							<Timer size={16} style={{ color: "var(--accent)", opacity: 0.7 }} />
 							<label
+								htmlFor="auto-unload"
 								style={{
 									fontSize: "12px",
 									fontWeight: 700,
@@ -446,6 +448,7 @@ export const HardwareSentinel: React.FC<HardwareSentinelProps> = ({ status }) =>
 						<div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px" }}>
 							{AUTO_UNLOAD_OPTIONS.map((opt) => (
 								<button
+									type="button"
 									key={opt.value}
 									onClick={() => setAutoUnload(opt.value)}
 									style={{
@@ -479,6 +482,7 @@ export const HardwareSentinel: React.FC<HardwareSentinelProps> = ({ status }) =>
 						<div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
 							<Power size={16} style={{ color: "var(--accent)", opacity: 0.7 }} />
 							<label
+								htmlFor="num-ctx"
 								style={{
 									fontSize: "12px",
 									fontWeight: 700,
@@ -502,6 +506,7 @@ export const HardwareSentinel: React.FC<HardwareSentinelProps> = ({ status }) =>
 						</p>
 						<div style={{ marginBottom: "12px" }}>
 							<input
+								id="num-ctx"
 								type="range"
 								min={512}
 								max={131072}
@@ -537,6 +542,7 @@ export const HardwareSentinel: React.FC<HardwareSentinelProps> = ({ status }) =>
 						<div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
 							{[2048, 4096, 8192, 16384, 32768].map((v) => (
 								<button
+									type="button"
 									key={v}
 									onClick={() => setNumCtx(v)}
 									style={{
@@ -569,6 +575,7 @@ export const HardwareSentinel: React.FC<HardwareSentinelProps> = ({ status }) =>
 					}}
 				>
 					<button
+						type="button"
 						className="auth-btn"
 						style={{ width: "auto", padding: "0 32px", display: "flex", alignItems: "center", gap: "8px" }}
 						onClick={saveSettings}

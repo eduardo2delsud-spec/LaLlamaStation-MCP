@@ -462,9 +462,10 @@ export class OllamaService {
 	}
 
 	async pullModel(model: string): Promise<void> {
-		const status = await this.getServerStatus();
-		if (status.diskSpace.free < 2) {
-			const msg = `Espacio insuficiente para descargar ${model}. Libres: ${status.diskSpace.free.toFixed(2)}GB`;
+		const status = (await this.getServerStatus()) as { diskSpace?: { free: number } };
+		const diskFree = status.diskSpace?.free ?? 0;
+		if (diskFree < 2) {
+			const msg = `Espacio insuficiente para descargar ${model}. Libres: ${diskFree.toFixed(2)}GB`;
 			if (this.io) this.io.emit("security-alert", { type: "error", message: msg });
 			throw new Error(msg);
 		}

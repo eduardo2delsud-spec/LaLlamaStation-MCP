@@ -34,7 +34,11 @@ interface Message {
 
 interface ChatPlaygroundProps {
 	models: OllamaModel[];
-	onSendMessage: (model: string, message: string, options: Record<string, unknown>) => Promise<Record<string, unknown>>;
+	onSendMessage: (
+		model: string,
+		message: string,
+		options: Record<string, any>
+	) => Promise<any>;
 }
 
 interface AttachmentFile {
@@ -1037,7 +1041,6 @@ export const ChatPlayground: React.FC<ChatPlaygroundProps> = ({ models, onSendMe
 						padding: "10px 14px",
 						transition: "border-color 0.2s",
 					}}
-					onFocus={() => {}}
 				>
 					<textarea
 						ref={textareaRef}
@@ -1079,6 +1082,7 @@ export const ChatPlayground: React.FC<ChatPlaygroundProps> = ({ models, onSendMe
 						<Paperclip size={16} />
 					</button>
 					<button
+						type="button"
 						onClick={handleSend}
 						disabled={loading || (!message.trim() && attachments.length === 0) || models.length === 0}
 						style={{

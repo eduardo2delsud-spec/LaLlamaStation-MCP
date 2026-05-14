@@ -99,7 +99,10 @@ services:
       - OLLAMA_API_URL=http://ollama:11434
       # - API_KEY=${API_KEY:-super-secret-mcp-key} # Descomenta si habilitas seguridad en el cerebro
     volumes:
-      - brain_data:/app/data
+      # Monta la carpeta local './data' en el contenedor para unificar la base de datos de SQLite entre el Dashboard y los agentes IDE del host
+      - ./data:/app/data
+      # (Opcional) Monta los esquemas de base de datos para desarrollo local en vivo
+      # - ./mcp-brain/src/database:/app/src/database
     depends_on:
       - ollama
     networks:

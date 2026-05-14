@@ -69,6 +69,7 @@ export const IpLogs: React.FC<IpLogsProps> = ({ logs, status, onBan }) => {
 					<div style={{ display: "flex", gap: "8px" }}>
 						{(["all", "success", "fail"] as const).map((f) => (
 							<button
+								type="button"
 								key={f}
 								onClick={() => setFilter(f)}
 								style={{
@@ -124,9 +125,9 @@ export const IpLogs: React.FC<IpLogsProps> = ({ logs, status, onBan }) => {
 						</div>
 					) : (
 						<div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-							{filtered.map((log, i) => (
+							{filtered.map((log) => (
 								<div
-									key={i}
+									key={log.timestamp}
 									style={{
 										display: "flex",
 										alignItems: "center",
@@ -180,6 +181,7 @@ export const IpLogs: React.FC<IpLogsProps> = ({ logs, status, onBan }) => {
 										{log.status}
 									</span>
 									<button
+										type="button"
 										onClick={() => onBan(log.ip)}
 										style={{
 											background: "rgba(239, 68, 68, 0.1)",

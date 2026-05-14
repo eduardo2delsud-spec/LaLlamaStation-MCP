@@ -33,7 +33,9 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 			if (thRes.data.value) setThreshold(thRes.data.value);
 			if (modRes.data.value) setModel(modRes.data.value);
 			if (modelsRes.data && Array.isArray(modelsRes.data.models)) {
-				const names = modelsRes.data.models.map((m: any) => m.name.split(":")[0]);
+				const names = modelsRes.data.models.map(
+					(m: Record<string, unknown>) => (m.name as string).split(":")[0]
+				);
 				setModelsList(Array.from(new Set(["llama3.2", ...names])));
 			}
 		} catch (error) {
@@ -75,8 +77,9 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 			} else {
 				setSyncMsg(res.data.message);
 			}
-		} catch (error: any) {
-			setSyncMsg(`Error: ${error.response?.data?.error || error.message}`);
+		} catch (error: unknown) {
+			const errObj = error as { response?: { data?: { error?: string } }; message?: string };
+			setSyncMsg(`Error: ${errObj.response?.data?.error || errObj.message || "Error desconocido"}`);
 		} finally {
 			setSyncing(false);
 		}
@@ -118,6 +121,7 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 					</div>
 				</div>
 				<button
+					type="button"
 					onClick={handleSave}
 					className="btn-send"
 					disabled={saving || loading}
@@ -263,6 +267,7 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 						</h4>
 					</div>
 					<button
+						type="button"
 						onClick={() => handleSync("cursor")}
 						className="btn-send"
 						style={{
@@ -309,6 +314,7 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 					{/* OpenCode */}
 					<div style={{ display: "flex", gap: "6px" }}>
 						<button
+							type="button"
 							onClick={() => handleSync("opencode")}
 							disabled={syncing}
 							className="btn-send"
@@ -324,6 +330,7 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 							🚀 Inyectar en OpenCode AI
 						</button>
 						<button
+							type="button"
 							className="btn-icon"
 							style={{
 								width: "42px",
@@ -344,6 +351,7 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 					{/* Antigravity */}
 					<div style={{ display: "flex", gap: "6px" }}>
 						<button
+							type="button"
 							onClick={() => handleSync("antigravity")}
 							disabled={syncing}
 							className="btn-send"
@@ -359,6 +367,7 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 							🌌 Inyectar en Antigravity AI
 						</button>
 						<button
+							type="button"
 							className="btn-icon"
 							style={{
 								width: "42px",
@@ -379,6 +388,7 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 					{/* RooCode */}
 					<div style={{ display: "flex", gap: "6px" }}>
 						<button
+							type="button"
 							onClick={() => handleSync("roocode")}
 							disabled={syncing}
 							className="btn-send"
@@ -394,6 +404,7 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 							🦊 Inyectar en RooCode (VS Code)
 						</button>
 						<button
+							type="button"
 							className="btn-icon"
 							style={{
 								width: "42px",
@@ -414,6 +425,7 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 					{/* Claude Desktop */}
 					<div style={{ display: "flex", gap: "6px" }}>
 						<button
+							type="button"
 							onClick={() => handleSync("claudedesktop")}
 							disabled={syncing}
 							className="btn-send"
@@ -429,6 +441,7 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 							🟧 Inyectar en Claude Desktop
 						</button>
 						<button
+							type="button"
 							className="btn-icon"
 							style={{
 								width: "42px",
@@ -449,6 +462,7 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 					{/* Cursor */}
 					<div style={{ display: "flex", gap: "6px" }}>
 						<button
+							type="button"
 							onClick={() => handleSync("cursor")}
 							disabled={syncing}
 							className="btn-send"
@@ -463,6 +477,7 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 							⚡ Copiar para Cursor IDE
 						</button>
 						<button
+							type="button"
 							className="btn-icon"
 							style={{
 								width: "42px",
@@ -483,6 +498,7 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 					{/* Windsurf */}
 					<div style={{ display: "flex", gap: "6px" }}>
 						<button
+							type="button"
 							onClick={() => handleSync("windsurf")}
 							disabled={syncing}
 							className="btn-send"
@@ -497,6 +513,7 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 							⚡ Copiar para Windsurf
 						</button>
 						<button
+							type="button"
 							className="btn-icon"
 							style={{
 								width: "42px",
@@ -537,6 +554,7 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 						</p>
 					</div>
 					<button
+						type="button"
 						onClick={handleConsolidate}
 						className="btn-send"
 						disabled={consolidating}

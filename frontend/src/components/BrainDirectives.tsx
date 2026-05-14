@@ -59,6 +59,7 @@ export const BrainDirectives: React.FC<BrainDirectivesProps> = ({ project }) => 
 					</div>
 				</div>
 				<button
+					type="button"
 					onClick={handleSave}
 					className="btn-send"
 					disabled={saving || loading}

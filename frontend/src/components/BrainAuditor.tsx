@@ -150,8 +150,6 @@ export const BrainAuditor: React.FC<BrainAuditorProps> = ({ project }) => {
 								padding: "16px",
 								transition: "var(--transition)",
 							}}
-							onMouseOver={(e) => (e.currentTarget.style.borderColor = "var(--accent-glow)")}
-							onMouseOut={(e) => (e.currentTarget.style.borderColor = "var(--border-light)")}
 						>
 							<div className="flex-between" style={{ marginBottom: "12px" }}>
 								<div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
@@ -178,6 +176,7 @@ export const BrainAuditor: React.FC<BrainAuditorProps> = ({ project }) => {
 										</span>
 									)}
 									<button
+										type="button"
 										onClick={() => handleDelete(mem.id)}
 										style={{
 											background: "none",
@@ -189,6 +188,8 @@ export const BrainAuditor: React.FC<BrainAuditorProps> = ({ project }) => {
 										}}
 										onMouseOver={(e) => (e.currentTarget.style.opacity = "1")}
 										onMouseOut={(e) => (e.currentTarget.style.opacity = "0.7")}
+										onFocus={(e) => (e.currentTarget.style.opacity = "1")}
+										onBlur={(e) => (e.currentTarget.style.opacity = "0.7")}
 										title="Olvidar Recuerdo"
 									>
 										<Trash2 size={16} />
@@ -217,9 +218,9 @@ export const BrainAuditor: React.FC<BrainAuditorProps> = ({ project }) => {
 										.split(",")
 										.map((tag) => tag.trim())
 										.filter(Boolean)
-										.map((tag, idx) => (
+										.map((tag) => (
 											<span
-												key={idx}
+												key={tag}
 												style={{
 													fontSize: "10px",
 													padding: "2px 8px",

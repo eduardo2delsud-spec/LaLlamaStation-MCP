@@ -278,6 +278,7 @@ export const ConnectionPanel: React.FC<ConnectionPanelProps> = ({
 				}}
 			>
 				<button
+					type="button"
 					onClick={() => setActiveView("apikey")}
 					className="connection-tab-btn"
 					style={{
@@ -290,6 +291,7 @@ export const ConnectionPanel: React.FC<ConnectionPanelProps> = ({
 					Clave API
 				</button>
 				<button
+					type="button"
 					onClick={() => setActiveView("mcp")}
 					className="connection-tab-btn"
 					style={{
@@ -302,6 +304,7 @@ export const ConnectionPanel: React.FC<ConnectionPanelProps> = ({
 					MCP
 				</button>
 				<button
+					type="button"
 					onClick={() => setActiveView("ngrok")}
 					className="connection-tab-btn"
 					style={{
@@ -370,6 +373,7 @@ export const ConnectionPanel: React.FC<ConnectionPanelProps> = ({
 						</label>
 
 						<button
+							type="button"
 							onClick={handleSave}
 							disabled={saving}
 							className="connection-main-btn"
@@ -408,6 +412,7 @@ export const ConnectionPanel: React.FC<ConnectionPanelProps> = ({
 							Controla si el puente MCP exige clave API para /sse, /messages y herramientas.
 						</p>
 						<button
+							type="button"
 							onClick={handleToggleMcp}
 							disabled={mcpUpdating}
 							className="connection-main-btn"
@@ -442,7 +447,12 @@ export const ConnectionPanel: React.FC<ConnectionPanelProps> = ({
 							<h3 style={{ fontSize: "12px", letterSpacing: "1px", textTransform: "uppercase" }}>
 								Acciones MCP
 							</h3>
-							<button onClick={loadMcpActions} className="btn-icon" title="Actualizar acciones">
+							<button
+								type="button"
+								onClick={loadMcpActions}
+								className="btn-icon"
+								title="Actualizar acciones"
+							>
 								<PlugZap size={14} />
 							</button>
 						</div>
@@ -486,6 +496,7 @@ export const ConnectionPanel: React.FC<ConnectionPanelProps> = ({
 												</span>
 											</div>
 											<button
+												type="button"
 												onClick={() => handleToggleMcpAction(action)}
 												disabled={mcpActionSaving === action.name}
 												style={{
@@ -536,6 +547,7 @@ export const ConnectionPanel: React.FC<ConnectionPanelProps> = ({
 
 						<div style={{ display: "flex", gap: "8px", marginBottom: "10px", flexWrap: "wrap" }}>
 							<button
+								type="button"
 								onClick={handleToggleNgrok}
 								disabled={ngrokLoading}
 								className="connection-main-btn"
@@ -545,6 +557,7 @@ export const ConnectionPanel: React.FC<ConnectionPanelProps> = ({
 								{ngrokLoading ? "Procesando..." : ngrokRunning ? "Detener" : "Iniciar"}
 							</button>
 							<button
+								type="button"
 								onClick={handleRestartNgrok}
 								disabled={ngrokLoading}
 								className="connection-main-btn"
@@ -559,6 +572,7 @@ export const ConnectionPanel: React.FC<ConnectionPanelProps> = ({
 								<RefreshCw size={14} className={ngrokLoading ? "animate-spin" : ""} /> Reiniciar
 							</button>
 							<button
+								type="button"
 								onClick={loadNgrokStatus}
 								disabled={ngrokLoading}
 								className="connection-main-btn"
@@ -585,7 +599,13 @@ export const ConnectionPanel: React.FC<ConnectionPanelProps> = ({
 							>
 								URL publica: {ngrokUrl || "No disponible"}
 							</span>
-							<button onClick={copyNgrokUrl} disabled={!ngrokUrl} className="btn-icon" title="Copiar URL">
+							<button
+								type="button"
+								onClick={copyNgrokUrl}
+								disabled={!ngrokUrl}
+								className="btn-icon"
+								title="Copiar URL"
+							>
 								{copiedUrl ? <Check size={14} /> : <Copy size={14} />}
 							</button>
 						</div>
@@ -735,6 +755,7 @@ export const ConnectionPanel: React.FC<ConnectionPanelProps> = ({
 										</button>
 									</div>
 									<button
+										type="button"
 										onClick={handleSaveNgrokToken}
 										disabled={ngrokTokenSaving}
 										className="connection-main-btn"

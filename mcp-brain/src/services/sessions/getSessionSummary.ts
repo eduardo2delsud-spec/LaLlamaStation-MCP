@@ -1,9 +1,9 @@
 import type { DatabaseService } from "../../database/connection.js";
 
 interface SessionSummaryResult {
-	session: unknown;
-	memories_count: number;
-	memories: unknown[];
+	session?: unknown;
+	memories_count?: number;
+	memories?: unknown[];
 	error?: string;
 }
 

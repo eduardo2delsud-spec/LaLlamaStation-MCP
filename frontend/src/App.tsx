@@ -250,7 +250,11 @@ const App: React.FC = () => {
 			await api.post("/api/pull", { model });
 		} catch (e: unknown) {
 			setPullProgress(null);
-			const errorMsg = e instanceof Error ? e.message : (e as { response?: { data?: { error?: string } } }).response?.data?.error || "Error al iniciar descarga";
+			const errorMsg =
+				e instanceof Error
+					? e.message
+					: (e as { response?: { data?: { error?: string } } }).response?.data?.error ||
+						"Error al iniciar descarga";
 			alert(errorMsg);
 		}
 	};
@@ -801,12 +805,10 @@ const App: React.FC = () => {
 							<span className="section-title">Navegación</span>
 						</div>
 						<div className="experts-list">
-							<div
-								role="button"
-								tabIndex={0}
+							<button
+								type="button"
 								className={`expert-item-wrap ${activeTab === "dashboard" ? "active" : ""}`}
 								onClick={() => setActiveTab("dashboard")}
-								onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setActiveTab("dashboard"); }}
 							>
 								<div className="expert-avatar">
 									<Activity size={16} />
@@ -815,14 +817,12 @@ const App: React.FC = () => {
 									<span className="expert-name">Dashboard</span>
 									<span className="expert-model">Control de Sistema</span>
 								</div>
-							</div>
+							</button>
 
-							<div
-								role="button"
-								tabIndex={0}
+							<button
+								type="button"
 								className={`expert-item-wrap ${activeTab === "playground" ? "active" : ""}`}
 								onClick={() => setActiveTab("playground")}
-								onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setActiveTab("playground"); }}
 							>
 								<div className="expert-avatar">
 									<Terminal size={16} />
@@ -831,14 +831,12 @@ const App: React.FC = () => {
 									<span className="expert-name">Playground</span>
 									<span className="expert-model">Inferencia Directa</span>
 								</div>
-							</div>
+							</button>
 
-							<div
-								role="button"
-								tabIndex={0}
+							<button
+								type="button"
 								className={`expert-item-wrap ${activeTab === "cerebro" ? "active" : ""}`}
 								onClick={() => setActiveTab("cerebro")}
-								onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setActiveTab("cerebro"); }}
 							>
 								<div className="expert-avatar" style={{ color: "var(--accent)" }}>
 									<svg
@@ -863,7 +861,7 @@ const App: React.FC = () => {
 									<span className="expert-name">Cerebro MCP</span>
 									<span className="expert-model">Base de Conocimiento</span>
 								</div>
-							</div>
+							</button>
 						</div>
 					</div>
 
@@ -895,7 +893,7 @@ const App: React.FC = () => {
 							<span className="section-title">Mantenimiento</span>
 						</div>
 						<div className="experts-list">
-							<div role="button" tabIndex={0} className="expert-item-wrap" onClick={handleCleanWorkspace} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleCleanWorkspace(); }}>
+							<button type="button" className="expert-item-wrap" onClick={handleCleanWorkspace}>
 								<div className="expert-avatar" style={{ color: "var(--text-muted)" }}>
 									<RefreshCw size={16} />
 								</div>
@@ -903,7 +901,7 @@ const App: React.FC = () => {
 									<span className="expert-name">Limpiar Cache</span>
 									<span className="expert-model">Archivos Temporales</span>
 								</div>
-							</div>
+							</button>
 						</div>
 					</div>
 				</nav>

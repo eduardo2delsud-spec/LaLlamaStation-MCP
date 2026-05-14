@@ -25,16 +25,16 @@ interface ConflictJudgment {
 }
 
 interface SessionSummary {
-	session: unknown;
-	memories_count: number;
-	memories: unknown[];
+	session?: unknown;
+	memories_count?: number;
+	memories?: unknown[];
 	error?: string;
 }
 
 interface MemoryComparison {
-	analysis: string;
-	memA: string;
-	memB: string;
+	analysis?: string;
+	memA?: string;
+	memB?: string;
 	error?: string;
 }
 

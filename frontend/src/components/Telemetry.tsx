@@ -60,7 +60,10 @@ export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl, o
 				setNgrokUrl(null);
 			}
 		} catch (e: unknown) {
-			const errorMsg = e instanceof Error ? e.message : (e as any)?.response?.data?.error || String(e);
+			const errorMsg =
+				e instanceof Error
+					? e.message
+					: (e as { response?: { data?: { error?: string } } })?.response?.data?.error || String(e);
 			alert(`Error controlando ngrok: ${errorMsg}`);
 		} finally {
 			setNgrokLoading(false);
@@ -100,7 +103,8 @@ export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl, o
 					const msg =
 						e instanceof Error
 							? e.message
-							: (e as any)?.response?.data?.error || "Error actualizando seguridad Ollama";
+							: (e as { response?: { data?: { error?: string } } })?.response?.data?.error ||
+								"Error actualizando seguridad Ollama";
 					alert(msg);
 				} finally {
 					setOllamaAuthLoading(false);
@@ -120,7 +124,8 @@ export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl, o
 				const msg =
 					e instanceof Error
 						? e.message
-						: (e as any)?.response?.data?.error || "Error actualizando seguridad MCP";
+						: (e as { response?: { data?: { error?: string } } })?.response?.data?.error ||
+							"Error actualizando seguridad MCP";
 				alert(msg);
 			} finally {
 				setMcpAuthLoading(false);
@@ -140,7 +145,10 @@ export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl, o
 				setTimeout(onRefresh, 2000);
 			}
 		} catch (e: unknown) {
-			const errorMsg = e instanceof Error ? e.message : (e as any)?.response?.data?.error || String(e);
+			const errorMsg =
+				e instanceof Error
+					? e.message
+					: (e as { response?: { data?: { error?: string } } })?.response?.data?.error || String(e);
 			alert(`Error controlando cerebro: ${errorMsg}`);
 		} finally {
 			setBrainLoading(false);
@@ -175,6 +183,7 @@ export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl, o
 						<div style={{ display: "flex", gap: "6px" }}>
 							{status?.ollamaRunning ? (
 								<button
+									type="button"
 									onClick={() => handleAction("stop")}
 									disabled={ollamaLoading}
 									className="btn-icon"
@@ -190,6 +199,7 @@ export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl, o
 								</button>
 							) : (
 								<button
+									type="button"
 									onClick={() => handleAction("start")}
 									disabled={ollamaLoading}
 									className="btn-icon"
@@ -205,6 +215,7 @@ export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl, o
 								</button>
 							)}
 							<button
+								type="button"
 								onClick={() => handleAction("restart")}
 								disabled={ollamaLoading}
 								className="btn-icon"
@@ -314,6 +325,7 @@ export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl, o
 							{ngrokActive ? "ONLINE" : "OFFLINE"}
 						</span>
 						<button
+							type="button"
 							onClick={toggleNgrok}
 							disabled={ngrokLoading}
 							style={{
@@ -356,6 +368,7 @@ export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl, o
 								{displayUrl}
 							</p>
 							<button
+								type="button"
 								onClick={copyUrl}
 								style={{
 									background: "transparent",
@@ -392,6 +405,7 @@ export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl, o
 							{status?.brainRunning ? "ONLINE" : "OFFLINE"}
 						</span>
 						<button
+							type="button"
 							onClick={toggleBrain}
 							disabled={brainLoading}
 							style={{
@@ -450,6 +464,7 @@ export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl, o
 							</span>
 						</div>
 						<button
+							type="button"
 							onClick={() => toggleAuth("ollama")}
 							disabled={ollamaAuthLoading}
 							style={{
@@ -501,6 +516,7 @@ export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl, o
 							</span>
 						</div>
 						<button
+							type="button"
 							onClick={() => toggleAuth("mcp")}
 							disabled={mcpAuthLoading}
 							style={{
@@ -588,7 +604,7 @@ export const Telemetry: React.FC<TelemetryProps> = ({ status, onOllamaControl, o
 							En VRAM
 						</p>
 						<p style={{ fontSize: "13px", fontWeight: 700 }}>
-							{loadedModels?.length > 0 ? loadedModels[0].name : "Ninguno"}
+							{(loadedModels?.length ?? 0) > 0 ? loadedModels?.[0]?.name : "Ninguno"}
 						</p>
 					</div>
 				</div>

@@ -24,6 +24,40 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.0/).
   - Endpoint `POST /api/mcp/sync` en `api.ts` para localizar y actualizar configuraciones en **OpenCode AI**, **Antigravity AI**, **RooCode (VS Code)** y **Claude Desktop**.
   - Tarjetas UI en `BrainSettings.tsx` con tooltips de información (`ℹ️`) y botón de copia global al portapapeles (`📋`).
 
+### 🧹 Corrección masiva Biome — 0 errores, 0 warnings (2026-05-14)
+
+#### Corregido
+
+##### Backend (`backend/`)
+- **Tipado fuerte**: Reemplazo masivo de `any` por tipos concretos en 6 archivos
+- **Interfaces creadas**: `MemoryStats`, `ConflictJudgment`, `SessionSummary`, `MemoryComparison`, `RequestLogEntry`, `SessionMessage`, `GpuMetrics`, `ChatResponse`, `ScrapedModel`
+- **Error handling**: ~20 bloques `catch (error: any)` migrados a `catch (error: unknown)`
+- **Middlewares**: `next: Function` reemplazado por `next: (err?: unknown) => void`
+- **Código muerto**: `ChatMessage` no usado eliminado
+
+##### mcp-brain/
+- **Tipado de promesas**: `Promise<any>` reemplazado por interfaces concretas en 11 archivos
+- **Limpieza**: Imports no usados eliminados, variables renombradas con prefijo `_`
+- **Error handling**: `catch (e: any)` tipados correctamente con `unknown`
+- **SQL mappings**: Tipado de filas de SQLite con interfaces específicas
+
+##### Frontend (`frontend/`)
+- **Accesibilidad**: `type="button"` añadido a ~25 botones sin tipo explícito
+- **Accesibilidad**: Elementos `div` con `onClick` convertidos a elementos interactivos accesibles (`role="button"`, `tabIndex`, `onKeyDown`)
+- **Accesibilidad**: SVG con `aria-label` añadido en iconos decorativos
+- **Error handling**: `catch (err: any)` → `catch (err: unknown)` en manejo de errores
+- **Tipado**: `[key: string]: any` → `[key: string]: unknown` en tipos de API
+- **Seguridad**: `document.getElementById("root")!` con null check antes del renderizado
+- **React keys**: Keys de arrays reemplazadas por IDs únicos en lugar de índices
+
+##### Automático (Biome format --write)
+- **Formateo**: 16 archivos corregidos automáticamente (indentación, comillas, saltos de línea)
+
+#### Impacto
+- Biome 2.4.8 ejecutado en **82 archivos** del proyecto
+- **134 errores** y **139 warnings** corregidos
+- **0 errores** y **0 warnings** después de las correcciones
+
 ### 📋 Revision completa del proyecto y actualizacion de documentacion (2026-05-12)
 
 #### Añadido
