@@ -1,0 +1,68 @@
+{
+	"$schema": "https://opencode.ai/config.json",
+	"default_agent": "orchestrator",
+	"provider": {
+		"lallamastation": {
+			"npm": "@ai-sdk/openai-compatible",
+			"name": "LaLlamaStation Proxy",
+			"options": {
+				"baseURL": "http://localhost:3000/v1"
+			},
+			"models": {
+				"llama3.2": {
+					"name": "llama3.2",
+					"reasoning": false,
+					"tools": true
+				},
+				"deepseek-r1": {
+					"name": "deepseek-r1",
+					"reasoning": true,
+					"tools": true
+				},
+				"qwen2.5-coder:7b": {
+					"name": "qwen2.5-coder:7b",
+					"reasoning": true,
+					"tools": true
+				}
+			}
+		}
+	},
+	"agent": {
+		"orchestrator": {
+			"mode": "primary"
+		},
+		"backend-dev": {
+			"mode": "subagent"
+		},
+		"frontend-dev": {
+			"mode": "subagent"
+		},
+		"docker-ops": {
+			"mode": "subagent"
+		},
+		"documentation": {
+			"mode": "subagent"
+		},
+		"qa-verification": {
+			"mode": "subagent"
+		},
+		"add-mcp-tool": {
+			"mode": "subagent"
+		},
+		"agent-creator": {
+			"mode": "subagent"
+		}
+	},
+	"mcp": {
+		"lallamastation-brain": {
+			"type": "local",
+			"command": "npx",
+			"args": ["tsx", "d:/Proyectos/LaLlamaStation MCP/mcp-brain/src/index.ts"],
+			"env": {
+				"OLLAMA_API_URL": "http://127.0.0.1:11434",
+				"BRAIN_PORT": "3015"
+			},
+			"enabled": true
+		}
+	}
+}

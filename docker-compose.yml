@@ -1,4 +1,5 @@
 version: "3.8"
+name: "lallamastation"
 
 services:
   ollama:
@@ -20,11 +21,11 @@ services:
       - mcp-network
     restart: no
 
-  mcp-server:
+  backend:
     build:
-      context: ./ollama-mcp-server
+      context: ./backend
       dockerfile: Dockerfile
-    container_name: mcp-server-app
+    container_name: backend
     volumes:
       - ollama_data:/root/.ollama:ro
       - /var/run/docker.sock:/var/run/docker.sock
@@ -55,32 +56,63 @@ services:
     image: ngrok/ngrok:latest
     container_name: mcp-ngrok-tunnel
     depends_on:
-      - mcp-server
+      - backend
     environment:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
     command:
       - http
-      - mcp-server:${APP_PORT:-4066}
+      - backend:${APP_PORT:-4066}
     networks:
       - mcp-network
     restart: "no"
 
-  mcp-frontend:
+  frontend:
     build:
-      context: ./mcp-frontend
+      context: ./frontend
       dockerfile: Dockerfile
-    container_name: mcp-frontend-app
+      args:
+        - VITE_API_URL=http://localhost:${APP_PORT:-3000}
+        - VITE_SOCKET_URL=http://localhost:${APP_PORT:-3000}
+        - VITE_BRAIN_API_URL=http://localhost:${BRAIN_PORT:-3015}
+    container_name: frontend
     ports:
       - "8080:80"
     environment:
       # inside docker the backend is reachable by service name
-      - VITE_API_URL=http://mcp-server:${APP_PORT:-4066}
-      - VITE_SOCKET_URL=http://mcp-server:${APP_PORT:-4066}
+      - VITE_API_URL=http://localhost:${APP_PORT:-4066}
+      - VITE_SOCKET_URL=http://localhost:${APP_PORT:-4066}
     networks:
       - mcp-network
     depends_on:
-      - mcp-server
-    restart: no
+      - backend
+    restart: always
+
+  mcp-brain:
+    build:
+      context: ./mcp-brain
+      dockerfile: Dockerfile
+    container_name: brain
+    ports:
+      - "${BRAIN_PORT:-3015}:${BRAIN_PORT:-3015}"
+    environment:
+      - BRAIN_PORT=${BRAIN_PORT:-3015}
+      - OLLAMA_API_URL=http://ollama:11434
+      # - API_KEY=${API_KEY:-super-secret-mcp-key} # Descomenta si habilitas seguridad en el cerebro
+    volumes:
+      # OPCIÓN A (Recomendada - Bind Mount al Host):
+      # Conecta la carpeta local de Windows './data' con '/app/data' dentro de Docker.
+      # Permite que el Dashboard y los agentes del IDE compartan exactamente el mismo archivo SQLite (lallama-memory.db).
+      - ./data:/app/data
+
+      # OPCIÓN B (Aislada - Volumen Virtual de Docker):
+      # Si prefieres que la base de datos viva de forma completamente aislada dentro del motor de Docker
+      # (sin tocar tu disco en Windows), comenta la línea de arriba y descomenta la siguiente:
+      # - brain_data:/app/data
+    depends_on:
+      - ollama
+    networks:
+      - mcp-network
+    restart: always
 
 networks:
   mcp-network:
@@ -88,3 +120,4 @@ networks:
 
 volumes:
   ollama_data:
+  brain_data:

@@ -7,6 +7,111 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.0/).
 
 ## [Unreleased]
 
+### 🧠 Evolución de mcp-brain y Auto-Sincronización MCP (2026-05-14)
+
+#### Añadido
+- **Conciencia de Fase SDD (Spec-Driven Development):**
+  - Columna `phase` añadida en tablas SQLite `memories` y `memories_fts`.
+  - Badges morados en la UI para auditar visualmente en qué fase del ciclo de vida se originó cada aprendizaje.
+- **Directivas Centrales (Core Directives) y Captura de Memoria Autónoma:**
+  - Nueva tabla `core_directives` para almacenar instrucciones inmutables por proyecto.
+  - Inyección automática de la cláusula de **OBLIGACIÓN COGNITIVA CRÍTICA** en `getCoreDirectives`, forzando a todos los agentes autónomos (Cursor, Claude, Antigravity) a ejecutar `mem_save` en el mismo turno tras editar código.
+- **Gatillos de Intervención (Delegation Triggers):**
+  - Rastreos de frecuencia de consultas en `searchMemories.ts`. Inyecta automáticamente la advertencia `WARNING_DELEGATION` si un agente repite búsquedas idénticas >3 veces en 5 minutos.
+- **Mantenimiento Proactivo y Consolidación (Ollama):**
+  - Servicio `consolidation.ts` que agrupa memorias por etiqueta y utiliza Ollama en segundo plano (vía Cronjob) para resumir redundancias en "Key Learnings" limpios.
+- **Auto-Instalador y Sincronización MCP (Auto-Sync):**
+  - Endpoint `POST /api/mcp/sync` en `api.ts` para localizar y actualizar configuraciones en **OpenCode AI**, **Antigravity AI**, **RooCode (VS Code)** y **Claude Desktop**.
+  - Tarjetas UI en `BrainSettings.tsx` con tooltips de información (`ℹ️`) y botón de copia global al portapapeles (`📋`).
+
+### 🧹 Corrección masiva Biome — 0 errores, 0 warnings (2026-05-14)
+
+#### Corregido
+
+##### Backend (`backend/`)
+- **Tipado fuerte**: Reemplazo masivo de `any` por tipos concretos en 6 archivos
+- **Interfaces creadas**: `MemoryStats`, `ConflictJudgment`, `SessionSummary`, `MemoryComparison`, `RequestLogEntry`, `SessionMessage`, `GpuMetrics`, `ChatResponse`, `ScrapedModel`
+- **Error handling**: ~20 bloques `catch (error: any)` migrados a `catch (error: unknown)`
+- **Middlewares**: `next: Function` reemplazado por `next: (err?: unknown) => void`
+- **Código muerto**: `ChatMessage` no usado eliminado
+
+##### mcp-brain/
+- **Tipado de promesas**: `Promise<any>` reemplazado por interfaces concretas en 11 archivos
+- **Limpieza**: Imports no usados eliminados, variables renombradas con prefijo `_`
+- **Error handling**: `catch (e: any)` tipados correctamente con `unknown`
+- **SQL mappings**: Tipado de filas de SQLite con interfaces específicas
+
+##### Frontend (`frontend/`)
+- **Accesibilidad**: `type="button"` añadido a ~25 botones sin tipo explícito
+- **Accesibilidad**: Elementos `div` con `onClick` convertidos a elementos interactivos accesibles (`role="button"`, `tabIndex`, `onKeyDown`)
+- **Accesibilidad**: SVG con `aria-label` añadido en iconos decorativos
+- **Error handling**: `catch (err: any)` → `catch (err: unknown)` en manejo de errores
+- **Tipado**: `[key: string]: any` → `[key: string]: unknown` en tipos de API
+- **Seguridad**: `document.getElementById("root")!` con null check antes del renderizado
+- **React keys**: Keys de arrays reemplazadas por IDs únicos en lugar de índices
+
+##### Automático (Biome format --write)
+- **Formateo**: 16 archivos corregidos automáticamente (indentación, comillas, saltos de línea)
+
+#### Impacto
+- Biome 2.4.8 ejecutado en **82 archivos** del proyecto
+- **134 errores** y **139 warnings** corregidos
+- **0 errores** y **0 warnings** después de las correcciones
+
+### 📋 Revision completa del proyecto y actualizacion de documentacion (2026-05-12)
+
+#### Añadido
+- **Informe de estado del proyecto** generado con analisis detallado de:
+  - Arquitectura general (5 servicios Docker)
+  - Backend: 25 endpoints REST, 7 MCP Tools, ~2400 lineas TypeScript
+  - Frontend: React 19 + Vite 7, 10 componentes, diseno glassmorphism
+  - Infraestructura Docker: analisis de problemas y areas de mejora
+  - Documentacion existente con estado de cada archivo
+
+#### Corregido
+- **README.md desactualizado**: Actualizada estructura de directorios (`.agents/` → `.opencode/agents/`, `mcp-frontend/` → `frontend/`, `ollama-mcp-server/` → `backend/`)
+- **Version badge**: Actualizado de 0.3.0 a 0.4.0
+- **Referencias eliminadas**: Directorios que ya no existen (`obsidian-vault/`, `AGENTS.md`, `DESIGN.md`)
+
+#### Documentacion
+- **README.md**: Reescrito completamente con estructura real del proyecto, lista completa de 7 MCP Tools, tabla de endpoints API, y tecnologias actualizadas
+- **CHANGELOG.md**: Documentada esta revision
+
+#### Notas de la Revision
+- Problemas detectados en `docker-compose.yml`:
+  1. Servicio `ngrok` y `frontend` dependen de `mcp-server` (deberia ser `backend`)
+  2. `VITE_API_URL` y `VITE_SOCKET_URL` apuntan a `mcp-server` (deberia ser `backend`)  
+  3. `mcp-brain` no tiene Dockerfile
+- Backend: `memory.tools.ts` registra handlers en mismo schema que `ollama.tools.ts` (conflicto potencial)
+- Frontend: `vite.config.ts` minimalista sin proxy de API
+
+### Corregido
+
+- **docker-compose.yml**: Corregidas 4 referencias a `mcp-server` (servicio inexistente) -> `backend`
+  - `ngrok.depends_on`: `mcp-server` -> `backend`
+  - `frontend.depends_on`: `mcp-server` -> `backend`
+  - `VITE_API_URL` y `VITE_SOCKET_URL`: `mcp-server` -> `backend`
+  - comando ngrok: `mcp-server` -> `backend`
+  - Agregado volumen `brain_data` faltante en la seccion `volumes:`
+- **mcp-brain Dockerfile**: Creado `mcp-brain/Dockerfile` (anteriormente faltaba)
+- **frontend/.env y .env.example**: URLs corregidas de `localhost:3000` a `backend:3000` para entorno Docker
+- **Conflicto MCP Tools**: Refactorizado registro de handlers en `app.module.ts` para combinar `ollama.tools.ts` (7 tools) y `memory.tools.ts` (14 tools) en un unico punto de registro, evitando sobreescritura
+- **vite.config.ts**: Agregada configuracion de proxy para `/api`, `/v1`, `/sse` y `/socket.io` hacia `localhost:3000`
+- **Instalacion de dependencias**: `pnpm install` ejecutado en la raiz del proyecto
+
+
+### 🤖 Agentes especializados por dominio (AÑADIDO - 2026-05-12)
+
+#### Añadido
+- **Sistema de 6 agentes especializados** como subagentes de opencode en `.opencode/agents/`:
+  - `frontend-dev`: React 19 + Vite 7, componentes glassmorphism, Socket.IO
+  - `backend-dev`: Express + TypeScript, dockerode, MCP SDK, auth, rate limiting
+  - `ollama-ops`: Gestión de modelos Ollama, GPU, streaming SSE, métricas
+  - `documentation`: CHANGELOG, README, Obsidian vault, diseño técnico
+  - `docker-ops`: Docker compose, Dockerfiles, ngrok, redes, GPU passthrough
+  - `qa-verification`: Biome lint, TypeScript builds, verificación post-cambio
+- También como skills de contexto detallado en `.agents/skills/` con frontmatter YAML y triggers por patrón de archivo
+
 ### ✨ Playground: Adjuntar archivos en chat (AGREGADO - 2026-04-19)
 
 #### Añadido
