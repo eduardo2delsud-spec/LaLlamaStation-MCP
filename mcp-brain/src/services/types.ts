@@ -6,6 +6,7 @@ export interface Memory {
 	content: string;
 	tags: string;
 	sessionId?: string;
+	phase?: string;
 	createdAt: number;
 	updatedAt: number;
 	score?: number; // solo para resultados semánticos

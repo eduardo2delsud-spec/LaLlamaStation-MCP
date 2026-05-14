@@ -12,6 +12,7 @@ export async function createMemoriesTable(db: Database<sqlite3.Database, sqlite3
 			tags TEXT,
 			sessionId TEXT,
 			vector TEXT,
+			phase TEXT,
 			createdAt INTEGER NOT NULL,
 			updatedAt INTEGER NOT NULL,
 			FOREIGN KEY (sessionId) REFERENCES sessions (id)
@@ -22,20 +23,22 @@ export async function createMemoriesTable(db: Database<sqlite3.Database, sqlite3
 			id UNINDEXED,
 			title,
 			content,
-			tags
+			tags,
+			phase
 		);
 
 		-- Triggers to keep FTS in sync
 		CREATE TRIGGER IF NOT EXISTS memories_ai AFTER INSERT ON memories BEGIN
-			INSERT INTO memories_fts(rowid, id, title, content, tags) 
-			VALUES (new.rowid, new.id, new.title, new.content, new.tags);
+			INSERT INTO memories_fts(rowid, id, title, content, tags, phase) 
+			VALUES (new.rowid, new.id, new.title, new.content, new.tags, new.phase);
 		END;
 
 		CREATE TRIGGER IF NOT EXISTS memories_au AFTER UPDATE ON memories BEGIN
 			UPDATE memories_fts SET 
 				title = new.title, 
 				content = new.content, 
-				tags = new.tags 
+				tags = new.tags,
+				phase = new.phase
 			WHERE id = new.id;
 		END;
 
@@ -49,5 +52,11 @@ export async function createMemoriesTable(db: Database<sqlite3.Database, sqlite3
 	const hasTopicKey = columns.some((col: any) => col.name === "topic_key");
 	if (!hasTopicKey) {
 		await db.exec("ALTER TABLE memories ADD COLUMN topic_key TEXT;");
+	}
+
+	// Safely add phase to existing database
+	const hasPhase = columns.some((col: any) => col.name === "phase");
+	if (!hasPhase) {
+		await db.exec("ALTER TABLE memories ADD COLUMN phase TEXT;");
 	}
 }

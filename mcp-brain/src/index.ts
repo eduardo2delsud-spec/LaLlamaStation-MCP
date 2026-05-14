@@ -3,6 +3,7 @@ import { validateEnv } from "./env.js";
 import { DatabaseService } from "./database/connection.js";
 import { startMcpServer } from "./server/mcp.js";
 import { startApiServer } from "./server/api.js";
+import { startCronJobs } from "./server/cron.js";
 
 async function bootstrap() {
 	// 1. Validar Entorno
@@ -15,6 +16,7 @@ async function bootstrap() {
 	// 3. Iniciar Servidores
 	await startMcpServer(dbService);
 	startApiServer(dbService);
+	startCronJobs(dbService);
 }
 
 bootstrap().catch((err) => {

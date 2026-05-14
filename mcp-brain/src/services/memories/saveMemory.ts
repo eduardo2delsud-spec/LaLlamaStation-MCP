@@ -12,7 +12,8 @@ export async function saveMemory(
 	content: string,
 	tags?: string,
 	sessionId?: string,
-	topicKey?: string
+	topicKey?: string,
+	phase?: string
 ): Promise<{ memory: Memory; judgment_required: boolean; candidates?: any[] }> {
 	const db = dbService.getDb();
 
@@ -45,9 +46,9 @@ export async function saveMemory(
 
 	await dbService.enqueueWrite(async () => {
 		await db.run(
-			`INSERT INTO memories (id, project, type, title, content, tags, sessionId, vector, topic_key, createdAt, updatedAt)
-			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			[id, project, type, title, content, tags || "", sessionId || null, vectorJson, topicKey || null, now, now]
+			`INSERT INTO memories (id, project, type, title, content, tags, sessionId, vector, topic_key, phase, createdAt, updatedAt)
+			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			[id, project, type, title, content, tags || "", sessionId || null, vectorJson, topicKey || null, phase || null, now, now]
 		);
 	});
 
@@ -73,6 +74,6 @@ export async function saveMemory(
 		}
 	}
 
-	const memory = { id, project, type, title, content, tags: tags || "", sessionId, createdAt: now, updatedAt: now };
+	const memory = { id, project, type, title, content, tags: tags || "", sessionId, phase, createdAt: now, updatedAt: now };
 	return { memory, judgment_required, candidates };
 }

@@ -1,7 +1,7 @@
 import cors from "cors";
 import express from "express";
 import type { DatabaseService } from "../database/connection.js";
-import { memories } from "../services/index.js";
+import { memories, settings, analysis } from "../services/index.js";
 
 const PORT = process.env.BRAIN_PORT || 3001;
 
@@ -40,6 +40,58 @@ export function startApiServer(dbService: DatabaseService) {
 			const success = await memories.deleteMemory(dbService, req.params.id);
 			if (success) res.json({ message: "Memory deleted" });
 			else res.status(404).json({ error: "Memory not found" });
+		} catch (e: any) {
+			res.status(500).json({ error: e.message });
+		}
+	});
+
+	// Directives
+	app.get("/api/directives", async (req, res) => {
+		const project = (req.query.project as string) || "lallamastation";
+		try {
+			const content = await settings.getCoreDirectives(dbService, project);
+			res.json({ project, content });
+		} catch (e: any) {
+			res.status(500).json({ error: e.message });
+		}
+	});
+
+	app.post("/api/directives", async (req, res) => {
+		const { project = "lallamastation", content } = req.body;
+		try {
+			await settings.updateCoreDirectives(dbService, project, content || "");
+			res.json({ success: true });
+		} catch (e: any) {
+			res.status(500).json({ error: e.message });
+		}
+	});
+
+	// Settings
+	app.get("/api/settings/:key", async (req, res) => {
+		try {
+			const value = await settings.getGlobalSetting(dbService, req.params.key);
+			res.json({ key: req.params.key, value });
+		} catch (e: any) {
+			res.status(500).json({ error: e.message });
+		}
+	});
+
+	app.post("/api/settings", async (req, res) => {
+		const { key, value } = req.body;
+		try {
+			await settings.updateGlobalSetting(dbService, key, value);
+			res.json({ success: true });
+		} catch (e: any) {
+			res.status(500).json({ error: e.message });
+		}
+	});
+
+	// Consolidation
+	app.post("/api/memory/consolidate", async (req, res) => {
+		const project = (req.body.project as string) || "lallamastation";
+		try {
+			const result = await analysis.consolidateMemories(dbService, project);
+			res.json(result);
 		} catch (e: any) {
 			res.status(500).json({ error: e.message });
 		}
