@@ -15,21 +15,26 @@ export function startApiServer(dbService: DatabaseService) {
 	app.use(cors());
 	app.use(express.json());
 
-	// Auto-Sync MCP
+	// Auto-Sync MCP (SSE / Docker-based)
 	app.post("/api/mcp/sync", async (req, res) => {
 		const { target } = req.body;
 		try {
-			const ollamaUrl = process.env.OLLAMA_API_URL || "http://127.0.0.1:11434";
 			const brainPort = process.env.BRAIN_PORT || "3015";
-			const scriptPath = path.resolve(process.cwd(), "src/index.ts").replace(/\\/g, "/");
+			const hostIp = process.env.HOST_IP || "localhost";
+			const sseUrl = `http://${hostIp}:${brainPort}/sse`;
 
-			const mcpConfigBlock = {
-				command: "npx",
-				args: ["tsx", scriptPath],
-				env: {
-					OLLAMA_API_URL: ollamaUrl,
-					BRAIN_PORT: brainPort,
-				},
+			// --- Config SSE para cada herramienta ---
+
+			// OpenCode AI usa schema propio con "type": "remote"
+			const openCodeSseConfig = {
+				type: "remote",
+				url: sseUrl,
+			};
+
+			// Claude Desktop / RooCode / Antigravity usan schema estandar con "type": "url"
+			const claudeCompatSseConfig = {
+				type: "url",
+				url: sseUrl,
 			};
 
 			const updateMcpFile = (filePath: string, serverKey: string, configObj: Record<string, unknown>) => {
@@ -53,15 +58,11 @@ export function startApiServer(dbService: DatabaseService) {
 				if (fs.existsSync(openCodePath)) {
 					const configData = JSON.parse(fs.readFileSync(openCodePath, "utf8"));
 					configData.mcp = configData.mcp || {};
-					configData.mcp["lallamastation-brain"] = {
-						type: "local",
-						...mcpConfigBlock,
-						enabled: true,
-					};
+					configData.mcp["lallamastation-brain"] = openCodeSseConfig;
 					fs.writeFileSync(openCodePath, JSON.stringify(configData, null, 2), "utf8");
 					return res.json({
 						success: true,
-						message: "¡Configuración de OpenCode AI sincronizada con éxito!",
+						message: "¡Configuración de OpenCode AI sincronizada con éxito! (SSE remoto)",
 					});
 				} else {
 					return res
@@ -70,27 +71,39 @@ export function startApiServer(dbService: DatabaseService) {
 				}
 			} else if (target === "antigravity") {
 				const agPath = path.join(os.homedir(), ".gemini/antigravity/mcp_config.json");
-				updateMcpFile(agPath, "lallamastation-brain", mcpConfigBlock);
+				updateMcpFile(agPath, "lallamastation-brain", claudeCompatSseConfig);
 				return res.json({
 					success: true,
-					message: "¡Motor Antigravity AI supercargado y sincronizado con éxito!",
+					message: "¡Motor Antigravity AI sincronizado con éxito! (SSE remoto)",
 				});
 			} else if (target === "claudedesktop") {
 				const cdPath = path.join(os.homedir(), "AppData/Roaming/Claude/claude_desktop_config.json");
-				updateMcpFile(cdPath, "lallamastation-brain", mcpConfigBlock);
-				return res.json({ success: true, message: "¡Claude Desktop sincronizado con éxito!" });
+				updateMcpFile(cdPath, "lallamastation-brain", claudeCompatSseConfig);
+				return res.json({
+					success: true,
+					message: "¡Claude Desktop sincronizado con éxito! (SSE remoto)",
+				});
 			} else if (target === "roocode") {
 				const rooPath = path.join(
 					os.homedir(),
 					"AppData/Roaming/Code/User/globalStorage/saoudrizwan.claude-dev/settings/claude_desktop_config.json"
 				);
-				updateMcpFile(rooPath, "lallamastation-brain", mcpConfigBlock);
-				return res.json({ success: true, message: "¡RooCode / Cline sincronizado con éxito en VS Code!" });
-			} else if (target === "cursor" || target === "claudecode" || target === "windsurf") {
+				updateMcpFile(rooPath, "lallamastation-brain", claudeCompatSseConfig);
+				return res.json({
+					success: true,
+					message: "¡RooCode / Cline sincronizado con éxito en VS Code! (SSE remoto)",
+				});
+			} else if (target === "cursor" || target === "claudecode") {
 				return res.json({
 					success: true,
 					message: `¡Copia y pega este bloque en los ajustes de ${target.toUpperCase()}:`,
-					config: { "lallamastation-brain": mcpConfigBlock },
+					config: { "lallamastation-brain": claudeCompatSseConfig },
+				});
+			} else if (target === "windsurf") {
+				return res.json({
+					success: true,
+					message: "¡Copia y pega este bloque en los ajustes de WINDSURF:",
+					config: { "lallamastation-brain": claudeCompatSseConfig },
 				});
 			} else {
 				return res.status(400).json({ error: "Destino no soportado." });
