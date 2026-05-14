@@ -33,11 +33,11 @@ services:
       - ollama
     environment:
       - OLLAMA_URL=http://ollama:11434
-      - APP_PORT=${APP_PORT:-4066}
+      - APP_PORT=${APP_PORT:-3000}
       - API_KEY=${API_KEY:-super-secret-mcp-key}
       - NGROK_CONTAINER_NAME=mcp-ngrok-tunnel
     ports:
-      - "${APP_PORT:-4066}:${APP_PORT:-4066}"
+      - "${APP_PORT:-3000}:${APP_PORT:-3000}"
     # habilita acceso a GPU si el host y Docker lo soportan
     deploy:
       resources:
@@ -61,7 +61,7 @@ services:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
     command:
       - http
-      - backend:${APP_PORT:-4066}
+      - backend:${APP_PORT:-3000}
     networks:
       - mcp-network
     restart: "no"
@@ -79,8 +79,8 @@ services:
       - "8080:80"
     environment:
       # inside docker the backend is reachable by service name
-      - VITE_API_URL=http://localhost:${APP_PORT:-4066}
-      - VITE_SOCKET_URL=http://localhost:${APP_PORT:-4066}
+      - VITE_API_URL=http://localhost:${APP_PORT:-3000}
+      - VITE_SOCKET_URL=http://localhost:${APP_PORT:-3000}
     networks:
       - mcp-network
     depends_on:
