@@ -1,5 +1,8 @@
 import cors from "cors";
 import express from "express";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import type { DatabaseService } from "../database/connection.js";
 import { memories, settings, analysis } from "../services/index.js";
 
@@ -9,6 +12,80 @@ export function startApiServer(dbService: DatabaseService) {
 	const app = express();
 	app.use(cors());
 	app.use(express.json());
+
+	// Auto-Sync MCP
+	app.post("/api/mcp/sync", async (req, res) => {
+		const { target } = req.body;
+		try {
+			const ollamaUrl = process.env.OLLAMA_API_URL || "http://127.0.0.1:11434";
+			const brainPort = process.env.BRAIN_PORT || "3001";
+			const scriptPath = path.resolve(process.cwd(), "src/index.ts").replace(/\\/g, "/");
+
+			const mcpConfigBlock = {
+				command: "npx",
+				args: ["tsx", scriptPath],
+				env: {
+					OLLAMA_API_URL: ollamaUrl,
+					BRAIN_PORT: brainPort,
+				},
+			};
+
+			const updateMcpFile = (filePath: string, serverKey: string, configObj: any) => {
+				const dir = path.dirname(filePath);
+				if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+				let data: any = { mcpServers: {} };
+				if (fs.existsSync(filePath)) {
+					try {
+						data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+					} catch (e) {
+						data = { mcpServers: {} };
+					}
+				}
+				data.mcpServers = data.mcpServers || {};
+				data.mcpServers[serverKey] = configObj;
+				fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+			};
+
+			if (target === "opencode") {
+				const openCodePath = path.resolve(process.cwd(), "../opencode.json");
+				if (fs.existsSync(openCodePath)) {
+					const configData = JSON.parse(fs.readFileSync(openCodePath, "utf8"));
+					configData.mcp = configData.mcp || {};
+					configData.mcp["lallamastation-brain"] = {
+						type: "local",
+						...mcpConfigBlock,
+						enabled: true,
+					};
+					fs.writeFileSync(openCodePath, JSON.stringify(configData, null, 2), "utf8");
+					return res.json({ success: true, message: "¡Configuración de OpenCode AI sincronizada con éxito!" });
+				} else {
+					return res.status(404).json({ error: "No se encontró el archivo opencode.json en la raíz del proyecto." });
+				}
+			} else if (target === "antigravity") {
+				const agPath = path.join(os.homedir(), ".gemini/antigravity/mcp_config.json");
+				updateMcpFile(agPath, "lallamastation-brain", mcpConfigBlock);
+				return res.json({ success: true, message: "¡Motor Antigravity AI supercargado y sincronizado con éxito!" });
+			} else if (target === "claudedesktop") {
+				const cdPath = path.join(os.homedir(), "AppData/Roaming/Claude/claude_desktop_config.json");
+				updateMcpFile(cdPath, "lallamastation-brain", mcpConfigBlock);
+				return res.json({ success: true, message: "¡Claude Desktop sincronizado con éxito!" });
+			} else if (target === "roocode") {
+				const rooPath = path.join(os.homedir(), "AppData/Roaming/Code/User/globalStorage/saoudrizwan.claude-dev/settings/claude_desktop_config.json");
+				updateMcpFile(rooPath, "lallamastation-brain", mcpConfigBlock);
+				return res.json({ success: true, message: "¡RooCode / Cline sincronizado con éxito en VS Code!" });
+			} else if (target === "cursor" || target === "claudecode" || target === "windsurf") {
+				return res.json({
+					success: true,
+					message: `¡Copia y pega este bloque en los ajustes de ${target.toUpperCase()}:`,
+					config: { "lallamastation-brain": mcpConfigBlock },
+				});
+			} else {
+				return res.status(400).json({ error: "Destino no soportado." });
+			}
+		} catch (e: any) {
+			res.status(500).json({ error: e.message });
+		}
+	});
 
 	app.get("/api/memory/stats", async (req, res) => {
 		const project = (req.query.project as string) || "lallamastation";
