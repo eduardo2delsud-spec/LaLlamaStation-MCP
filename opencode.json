@@ -63,7 +63,7 @@
 			],
 			"env": {
 				"OLLAMA_API_URL": "http://127.0.0.1:11434",
-				"BRAIN_PORT": "3015"
+				"BRAIN_PORT": "3666"
 			},
 			"enabled": true
 		}
