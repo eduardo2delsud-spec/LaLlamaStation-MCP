@@ -50,7 +50,7 @@ mcp-brain/
 2. (Opcional) Crea un archivo `.env` en la raíz de `mcp-brain` si tu instancia de Ollama no corre en el puerto predeterminado:
    ```env
    OLLAMA_API_URL=http://127.0.0.1:11434
-   BRAIN_PORT=3001
+   BRAIN_PORT=3015
    ```
 
 3. Compila el proyecto:
