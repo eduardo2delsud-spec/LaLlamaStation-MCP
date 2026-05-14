@@ -14,6 +14,7 @@ interface BrainStats {
 export const BrainConsole: React.FC = () => {
 	const [stats, setStats] = useState<BrainStats>({ total: 0, types: [] });
 	const [project, setProject] = useState("lallamastation");
+	const [projectsList, setProjectsList] = useState<string[]>(["lallamastation"]);
 	const [activeTab, setActiveTab] = useState<"auditor" | "directives" | "settings">("auditor");
 
 	const fetchStats = useCallback(async () => {
@@ -25,9 +26,30 @@ export const BrainConsole: React.FC = () => {
 		}
 	}, [project]);
 
+	const fetchProjects = useCallback(async () => {
+		try {
+			const res = await brainApi.get("/api/projects");
+			if (res.data && Array.isArray(res.data)) {
+				setProjectsList(res.data);
+			}
+		} catch (error) {
+			console.error("Error fetching projects", error);
+		}
+	}, []);
+
 	useEffect(() => {
 		fetchStats();
-	}, [fetchStats]);
+		fetchProjects();
+	}, [fetchStats, fetchProjects]);
+
+	const handleAddProject = () => {
+		const name = window.prompt("Ingresa el nombre del nuevo proyecto:");
+		if (name && name.trim()) {
+			const cleanName = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-");
+			setProjectsList((prev) => Array.from(new Set([...prev, cleanName])));
+			setProject(cleanName);
+		}
+	};
 
 	return (
 		<div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
@@ -219,11 +241,28 @@ export const BrainConsole: React.FC = () => {
 						</h3>
 						<div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
 							<div>
-								<span style={{ fontSize: "10px", color: "var(--text-dim)", textTransform: "uppercase" }}>
-									Proyecto Target
-								</span>
-								<input
-									type="text"
+								<div className="flex-between" style={{ alignItems: "center", marginBottom: "4px" }}>
+									<span style={{ fontSize: "10px", color: "var(--text-dim)", textTransform: "uppercase" }}>
+										Proyecto Target
+									</span>
+									<button
+										onClick={handleAddProject}
+										type="button"
+										style={{
+											fontSize: "10px",
+											background: "rgba(79, 140, 255, 0.2)",
+											color: "var(--accent)",
+											border: "none",
+											borderRadius: "4px",
+											padding: "2px 6px",
+											cursor: "pointer",
+											fontWeight: 600,
+										}}
+									>
+										+ Nuevo
+									</button>
+								</div>
+								<select
 									value={project}
 									onChange={(e) => setProject(e.target.value)}
 									style={{
@@ -234,10 +273,16 @@ export const BrainConsole: React.FC = () => {
 										borderRadius: "6px",
 										color: "white",
 										fontSize: "12px",
-										marginTop: "4px",
 										fontFamily: "var(--font-mono)",
+										cursor: "pointer",
 									}}
-								/>
+								>
+									{projectsList.map((p) => (
+										<option key={p} value={p}>
+											{p}
+										</option>
+									))}
+								</select>
 							</div>
 							<div
 								style={{

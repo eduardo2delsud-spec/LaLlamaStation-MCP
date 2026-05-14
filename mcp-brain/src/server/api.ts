@@ -45,6 +45,22 @@ export function startApiServer(dbService: DatabaseService) {
 		}
 	});
 
+	// Projects
+	app.get("/api/projects", async (req, res) => {
+		try {
+			const db = dbService.getDb();
+			const rows = await db.all(`
+				SELECT DISTINCT project FROM memories 
+				UNION 
+				SELECT DISTINCT project FROM core_directives
+			`);
+			const projects = Array.from(new Set(["lallamastation", ...rows.map((r: any) => r.project)]));
+			res.json(projects);
+		} catch (e: any) {
+			res.status(500).json({ error: e.message });
+		}
+	});
+
 	// Directives
 	app.get("/api/directives", async (req, res) => {
 		const project = (req.query.project as string) || "lallamastation";

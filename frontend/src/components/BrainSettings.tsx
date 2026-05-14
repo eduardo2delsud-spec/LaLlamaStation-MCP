@@ -1,7 +1,7 @@
 import { Activity, Cpu, Play, RefreshCw, Save, ShieldAlert } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
-import { brainApi } from "../services/api.service";
+import { api, brainApi } from "../services/api.service";
 
 interface BrainSettingsProps {
 	project: string;
@@ -10,6 +10,7 @@ interface BrainSettingsProps {
 export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 	const [threshold, setThreshold] = useState("3");
 	const [model, setModel] = useState("llama3.2");
+	const [modelsList, setModelsList] = useState<string[]>(["llama3.2"]);
 	const [loading, setLoading] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const [consolidating, setConsolidating] = useState(false);
@@ -19,12 +20,17 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 	const fetchSettings = useCallback(async () => {
 		setLoading(true);
 		try {
-			const [thRes, modRes] = await Promise.all([
+			const [thRes, modRes, modelsRes] = await Promise.all([
 				brainApi.get("/api/settings/delegation_threshold"),
 				brainApi.get("/api/settings/consolidation_model"),
+				api.get("/api/models").catch(() => ({ data: { models: [] } })),
 			]);
 			if (thRes.data.value) setThreshold(thRes.data.value);
 			if (modRes.data.value) setModel(modRes.data.value);
+			if (modelsRes.data && Array.isArray(modelsRes.data.models)) {
+				const names = modelsRes.data.models.map((m: any) => m.name.split(":")[0]);
+				setModelsList(Array.from(new Set(["llama3.2", ...names])));
+			}
 		} catch (error) {
 			console.error("Error fetching brain settings", error);
 		} finally {
@@ -101,15 +107,18 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 					<p style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "16px", lineHeight: 1.5 }}>
 						Número máximo de búsquedas idénticas permitidas en un lapso de 5 minutos antes de forzar al agente a detenerse o cambiar de fase SDD.
 					</p>
-					<input
-						type="number"
-						min="1"
-						max="10"
+					<select
 						value={threshold}
 						onChange={(e) => setThreshold(e.target.value)}
 						className="input-field"
-						style={{ width: "100%", background: "var(--bg-input)" }}
-					/>
+						style={{ width: "100%", background: "var(--bg-input)", border: "1px solid var(--border)", color: "white", padding: "10px 14px", borderRadius: "8px", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: "13px" }}
+					>
+						{[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+							<option key={num} value={num}>
+								{num} {num === 1 ? "búsqueda repetida" : "búsquedas repetidas"}
+							</option>
+						))}
+					</select>
 				</div>
 
 				{/* Modelo de Consolidación */}
@@ -121,13 +130,18 @@ export const BrainSettings: React.FC<BrainSettingsProps> = ({ project }) => {
 					<p style={{ fontSize: "12px", color: "var(--text-dim)", marginBottom: "16px", lineHeight: 1.5 }}>
 						Modelo de IA utilizado por Ollama para ejecutar la agrupación y resumen de aprendizajes redundantes en background.
 					</p>
-					<input
-						type="text"
+					<select
 						value={model}
 						onChange={(e) => setModel(e.target.value)}
 						className="input-field"
-						style={{ width: "100%", background: "var(--bg-input)" }}
-					/>
+						style={{ width: "100%", background: "var(--bg-input)", border: "1px solid var(--border)", color: "white", padding: "10px 14px", borderRadius: "8px", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: "13px" }}
+					>
+						{modelsList.map((m) => (
+							<option key={m} value={m}>
+								{m}
+							</option>
+						))}
+					</select>
 				</div>
 			</div>
 

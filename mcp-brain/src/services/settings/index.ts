@@ -3,7 +3,14 @@ import type { DatabaseService } from "../../database/connection.js";
 export async function getCoreDirectives(dbService: DatabaseService, project: string): Promise<string> {
 	const db = dbService.getDb();
 	const row = await db.get(`SELECT content FROM core_directives WHERE project = ?`, [project]);
-	return row ? row.content : "";
+	if (row && row.content) {
+		return row.content;
+	}
+	return `# Directivas Centrales: ${project}
+
+1. **Arquitectura Limpia:** Mantén el código modular y desacoplado.
+2. **Spec-Driven Development (SDD):** Evalúa e indica siempre la fase activa (exploración, diseño, implementación, revisión).
+3. **Transparencia:** Registra los aprendizajes clave en la memoria pasiva para evitar redundancia.`;
 }
 
 export async function updateCoreDirectives(dbService: DatabaseService, project: string, content: string): Promise<boolean> {
