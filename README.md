@@ -17,7 +17,7 @@ LaLlamaStation MCP es un servidor de control (**Model Control Panel**) que envue
 - **Seguridad**: autenticacion por API Key, blacklist de IPs, auto-ban, rate limiting
 - **Performance Metrics**: TTFT, throughput tok/s en tiempo real
 - **Streaming**: tokens en vivo via SSE compatible con OpenAI
-- **Cerebro MCP**: memoria persistente con busqueda semantica (cosine similarity + FTS5)
+- **Cerebro MCP**: memoria persistente con busqueda semantica, fases SDD, directivas centrales, consolidacion proactiva y auto-sincronizacion con IDEs (Cursor, Claude, Antigravity)
 - **Tunel Ngrok**: expone el servidor al exterior con un click desde la web
 
 ---
@@ -161,6 +161,10 @@ LaLlamaStation MCP/
 - `GET /api/memory/stats` - Estadisticas de memoria
 - `GET /api/memory/search` - Busqueda semantica/lexical
 - `DELETE /api/memory/:id` - Eliminar memoria
+- `GET /api/settings/core_directives` - Obtener directivas de proyecto
+- `POST /api/settings/core_directives` - Guardar directivas de proyecto
+- `POST /api/memory/consolidate` - Ejecutar consolidacion manual
+- `POST /api/mcp/sync` - Inyectar configuracion MCP en IDEs
 
 ### MCP Tools (7 herramientas)
 | Tool | Descripcion |

@@ -7,6 +7,23 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.0/).
 
 ## [Unreleased]
 
+### 🧠 Evolución de mcp-brain y Auto-Sincronización MCP (2026-05-14)
+
+#### Añadido
+- **Conciencia de Fase SDD (Spec-Driven Development):**
+  - Columna `phase` añadida en tablas SQLite `memories` y `memories_fts`.
+  - Badges morados en la UI para auditar visualmente en qué fase del ciclo de vida se originó cada aprendizaje.
+- **Directivas Centrales (Core Directives) y Captura de Memoria Autónoma:**
+  - Nueva tabla `core_directives` para almacenar instrucciones inmutables por proyecto.
+  - Inyección automática de la cláusula de **OBLIGACIÓN COGNITIVA CRÍTICA** en `getCoreDirectives`, forzando a todos los agentes autónomos (Cursor, Claude, Antigravity) a ejecutar `mem_save` en el mismo turno tras editar código.
+- **Gatillos de Intervención (Delegation Triggers):**
+  - Rastreos de frecuencia de consultas en `searchMemories.ts`. Inyecta automáticamente la advertencia `WARNING_DELEGATION` si un agente repite búsquedas idénticas >3 veces en 5 minutos.
+- **Mantenimiento Proactivo y Consolidación (Ollama):**
+  - Servicio `consolidation.ts` que agrupa memorias por etiqueta y utiliza Ollama en segundo plano (vía Cronjob) para resumir redundancias en "Key Learnings" limpios.
+- **Auto-Instalador y Sincronización MCP (Auto-Sync):**
+  - Endpoint `POST /api/mcp/sync` en `api.ts` para localizar y actualizar configuraciones en **OpenCode AI**, **Antigravity AI**, **RooCode (VS Code)** y **Claude Desktop**.
+  - Tarjetas UI en `BrainSettings.tsx` con tooltips de información (`ℹ️`) y botón de copia global al portapapeles (`📋`).
+
 ### 📋 Revision completa del proyecto y actualizacion de documentacion (2026-05-12)
 
 #### Añadido
