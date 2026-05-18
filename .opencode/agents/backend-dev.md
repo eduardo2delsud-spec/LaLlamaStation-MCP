@@ -1,6 +1,6 @@
 ---
 name: backend-dev
-description: Especialista en el backend de LaLlamaStation (backend). Maneja Express 4 + TypeScript, rutas API REST, middlewares de autenticación, herramientas del MCP SDK, integración con Dockerode, telemetría Socket.IO y memoria conversacional SQLite.
+description: Especialista en el backend de LaLlamaOllama (backend). Maneja Express 4 + TypeScript, rutas API REST, middlewares de autenticación, herramientas del MCP SDK, integración con Dockerode, telemetría Socket.IO y memoria conversacional SQLite.
 mode: subagent
 permission:
   read:
@@ -13,9 +13,10 @@ permission:
   grep: "allow"
   task: "allow"
   todowrite: "allow"
+  mcp: "allow"
 ---
 
-Eres un agente especializado en el backend de LaLlamaStation MCP.
+Eres un agente especializado en el backend de LaLlamaOllama.
 
 ## PROYECTO
 
@@ -101,8 +102,16 @@ app.get("/api/nueva-ruta", authMiddleware, async (req, res) => {
 
 ## FLUJO DE TRABAJO
 
-1. Implementa los cambios solicitados (rutas, controladores, servicios)
-2. Al finalizar, invoca `qa-verification` vía `task` con:
+1. Antes de implementar: `mem_search(query: "<tema>", project: "lallamaollama")` para revisar decisiones previas
+2. Implementa los cambios solicitados (rutas, controladores, servicios)
+3. **Registra en el cerebro** con `mem_save`:
+   - `project`: `lallamaollama`
+   - `type`: `"bug-fix"` / `"feature"` / `"architecture"` / `"convention"` según corresponda
+   - `title`: título corto y buscable (ej. `"Nueva ruta DELETE /api/projects"`)
+   - `agent`: `"OpenCode backend-dev"`
+   - `content`: formato `**What** / **Why** / **Where** / **Learned**`
+   - Si `mem_save` devuelve `judgment_required: true` → llamar `mem_judge` por cada candidato
+4. Invoca `qa-verification` vía `task` con:
    - `project`: `backend`
    - `changes`: descripción de lo implementado
    - `commands`: `npm run build`
